@@ -1,0 +1,1797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0f131c" />
+  <title>LifeSync AI — Main Intelligent Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet" />
+  
+  <!-- React 18 & Babel for standalone browser runtime -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    /* ================= DESIGN TOKENS ================= */
+    :root {
+      --bg-app: #0f131c;
+      --bg-sidebar: #0a0e17;
+      --bg-card: #181b25;
+      --bg-item: #1c1f29;
+      --bg-item-soft: rgba(28, 31, 41, 0.6);
+      --bg-chip: #262a34;
+      --bg-chip-strong: #31353f;
+      --bg-reasoning: rgba(10, 14, 23, 0.8);
+      --bg-header: rgba(15, 19, 28, 0.85);
+
+      --text-primary: #dfe2ef;
+      --text-secondary: #c2c6d6;
+      --text-muted: #8c909f;
+
+      --blue: #4d8eff;
+      --blue-soft: #adc6ff;
+      --indigo: #c0c1ff;
+      --violet: #d0bcff;
+      --violet-glow: #a078ff;
+      --danger: #93000a;
+      --danger-soft: #ffb4ab;
+      --danger-text: #ffdad6;
+      --danger-bg: rgba(147, 0, 10, 0.3);
+      --indigo-bg: rgba(49, 49, 192, 0.4);
+      --indigo-badge: #3131c0;
+      --indigo-badge-text: #b0b2ff;
+      --on-blue: #00285d;
+      --on-blue-soft: #002e6a;
+
+      --font-display: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+      --font-body: "Inter", system-ui, -apple-system, sans-serif;
+      --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+      --r-xs: 4px;
+      --r-sm: 8px;
+      --r-md: 12px;
+      --r-lg: 16px;
+      --r-pill: 9999px;
+
+      --shadow-card: 0 1px 1px rgba(0, 0, 0, 0.05);
+      --shadow-hero: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+
+      --sidebar-w: 288px;
+      --header-h: 64px;
+      --content-max: 992px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body, #root { height: 100%; }
+    body {
+      margin: 0;
+      background: var(--bg-app);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: 14px;
+      line-height: 20px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    h1, h2, h3, h4, p { margin: 0; }
+    ul { list-style: none; margin: 0; padding: 0; }
+    button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+    a { color: inherit; text-decoration: none; }
+    svg { display: block; flex-shrink: 0; }
+    :focus-visible { outline: 2px solid var(--blue-soft); outline-offset: 2px; }
+
+    /* Shell & Layout */
+    .shell { min-height: 100%; display: flex; flex-direction: column; }
+    .main { margin-left: var(--sidebar-w); min-width: 0; flex: 1; display: flex; flex-direction: column; }
+    .content {
+      position: relative;
+      max-width: var(--content-max);
+      margin: 0 auto;
+      width: 100%;
+      padding: 40px 24px 64px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Aura */
+    .aura { position: absolute; inset: 0 0 auto 0; height: 256px; overflow: hidden; pointer-events: none; }
+    .aura__a { position: absolute; border-radius: var(--r-pill); left: 25%; width: 41%; height: 384px; top: -96px; background: rgba(77, 142, 255, 0.1); filter: blur(50px); }
+    .aura__b { position: absolute; border-radius: var(--r-pill); left: 12.4%; width: 54%; height: 320px; top: -112px; background: rgba(160, 120, 255, 0.15); filter: blur(60px); }
+
+    /* Sidebar */
+    .sidebar {
+      position: fixed; inset: 0 auto 0 0;
+      width: var(--sidebar-w);
+      background: var(--bg-sidebar);
+      display: flex; flex-direction: column;
+      z-index: 40;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+      border-right: 1px solid rgba(255, 255, 255, 0.03);
+    }
+    .sidebar__brand { height: var(--header-h); padding: 0 16px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+    .brand { display: flex; align-items: center; gap: 8px; }
+    .brand__logo {
+      width: 32px; height: 32px; border-radius: var(--r-sm);
+      display: grid; place-items: center;
+      color: var(--blue-soft);
+      background: linear-gradient(140deg, rgba(77,142,255,.25), rgba(160,120,255,.25));
+      box-shadow: inset 0 0 0 1px rgba(173,198,255,.25);
+    }
+    .brand__name { font: 600 16px/24px var(--font-display); letter-spacing: -0.4px; }
+    .sidebar__nav { flex: 1; overflow-y: auto; padding: 8px; display: flex; flex-direction: column; gap: 12px; }
+    .nav-section { display: flex; flex-direction: column; gap: 4px; }
+    .nav-section__label { padding: 5px 8px 7px; font: 600 11px/14px var(--font-body); letter-spacing: .55px; text-transform: uppercase; color: var(--text-muted); }
+    .nav-link {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      padding: 6px 10px; min-height: 34px; border-radius: var(--r-sm);
+      font: 500 13px/18px var(--font-body); color: var(--text-secondary);
+      transition: background-color .15s, color .15s;
+    }
+    .nav-link:hover { background: var(--bg-item); color: var(--text-primary); }
+    .nav-link__main { display: flex; align-items: center; gap: 8px; }
+    .nav-link--active, .nav-link--active:hover { background: var(--blue); color: var(--on-blue); font-weight: 600; }
+    .nav-badge { padding: 2px 6px; border-radius: var(--r-pill); font: 600 10px/12px var(--font-body); }
+    .nav-badge--indigo { background: var(--indigo-badge); color: var(--indigo-badge-text); }
+    .nav-badge--neutral { background: var(--bg-chip); color: var(--blue-soft); }
+    .nav-badge--danger { background: var(--danger); color: var(--danger-text); }
+
+    .sidebar__footer { padding: 12px; display: flex; flex-direction: column; gap: 8px; background: var(--bg-sidebar); border-top: 1px solid rgba(255,255,255,0.03); }
+    .status-card { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: var(--r-sm); background: var(--bg-item); }
+    .status-card__text { min-width: 0; }
+    .status-card__title { font: 600 11px/14px var(--font-body); }
+    .status-card__sub { font: 400 11px/16px var(--font-body); color: var(--text-secondary); }
+    .profile { display: flex; align-items: center; justify-content: space-between; padding: 4px 4px 0; }
+    .profile__who { display: flex; align-items: center; gap: 8px; }
+    .profile__name { font: 600 12px/16px var(--font-body); }
+    .profile__email { font: 400 11px/14px var(--font-body); color: var(--text-muted); }
+    .scrim { display: none; }
+
+    /* Header */
+    .header {
+      position: sticky; top: 0; z-index: 30;
+      height: var(--header-h);
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      padding: 0 24px;
+      background: var(--bg-header);
+      -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+      box-shadow: 0 1px 8px rgba(0, 0, 0, 0.15);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    }
+    .header__menu { display: none; }
+    .search { position: relative; flex: 1; min-width: 0; max-width: 480px; }
+    .search__icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; }
+    .search__input {
+      width: 100%; height: 38px; padding: 0 54px 0 34px;
+      background: var(--bg-card); color: var(--text-primary);
+      border: 1px solid rgba(255, 255, 255, 0.05); border-radius: var(--r-sm);
+      font: 400 13px/normal var(--font-body);
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .search__input:focus { outline: none; border-color: rgba(173,198,255,.5); box-shadow: 0 0 0 2px rgba(77, 142, 255, 0.2); }
+    .search__kbd {
+      position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+      padding: 2px 6px; border-radius: var(--r-xs); background: var(--bg-chip);
+      font: 500 10px/12px var(--font-mono); color: var(--text-secondary);
+    }
+    .search-dropdown {
+      position: absolute; top: calc(100% + 6px); left: 0; right: 0;
+      background: var(--bg-card); border-radius: var(--r-md);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.08);
+      max-height: 320px; overflow-y: auto; z-index: 50; padding: 6px;
+    }
+    .search-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 12px; border-radius: var(--r-sm); cursor: pointer;
+      transition: background .15s;
+    }
+    .search-item:hover { background: var(--bg-item); }
+    .search-item__title { font-weight: 500; font-size: 13px; }
+    .search-item__type { font-size: 11px; color: var(--blue-soft); background: var(--bg-chip); padding: 2px 6px; border-radius: var(--r-xs); }
+
+    .header__actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .header__divider { width: 1px; height: 28px; background: var(--bg-chip-strong); margin: 0 4px; }
+    .header__bell { position: relative; }
+    .header__bell-dot { position: absolute; top: 8px; right: 8px; width: 8px; height: 8px; border-radius: var(--r-pill); background: var(--blue-soft); }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      height: 38px; padding: 0 14px; border-radius: var(--r-sm);
+      font: 500 12px/16px var(--font-body); letter-spacing: .24px; white-space: nowrap;
+      transition: filter .15s, background-color .15s, transform .05s;
+    }
+    .btn:hover:not(:disabled) { filter: brightness(1.1); }
+    .btn:active:not(:disabled) { transform: translateY(1px); }
+    .btn:disabled { opacity: .65; cursor: default; }
+    .btn--sm { height: 34px; padding: 0 12px; }
+    .btn--xs { height: auto; padding: 4px 8px; font-size: 11px; font-weight: 600; border-radius: var(--r-xs); }
+    .btn--lg { height: 46px; border-radius: var(--r-md); font-size: 14px; letter-spacing: .14px; }
+    .btn--blue { background: var(--blue); color: var(--on-blue); font-weight: 600; box-shadow: var(--shadow-card); }
+    .btn--soft-blue { background: var(--blue-soft); color: var(--on-blue-soft); font-weight: 600; padding: 0 20px; box-shadow: 0 4px 10px rgba(77, 142, 255, 0.2); }
+    .btn--chip { background: var(--bg-chip-strong); color: var(--text-primary); }
+    .btn--lg.btn--chip { background: var(--bg-chip); }
+    .btn--ghost-violet { background: var(--bg-card); color: var(--violet); border: 1px solid rgba(208, 188, 255, 0.15); box-shadow: 0 0 12px rgba(160, 120, 255, 0.12); }
+    .btn--text { height: 38px; padding: 0 8px; color: var(--text-secondary); }
+    .btn--text:hover:not(:disabled) { background: var(--bg-chip); filter: none; }
+
+    .icon-btn { display: inline-grid; place-items: center; width: 38px; height: 38px; border-radius: var(--r-sm); color: var(--text-secondary); }
+    .icon-btn:hover { background: var(--bg-chip); color: var(--text-primary); }
+    .icon-btn--sm { width: 28px; height: 28px; }
+
+    .link-btn { display: inline-flex; align-items: center; gap: 4px; font: 600 11px/14px var(--font-body); letter-spacing: .44px; color: var(--text-muted); text-decoration: underline; }
+    .link-btn:hover:not(:disabled) { color: var(--text-primary); }
+    .link-btn--indigo { color: var(--indigo); text-decoration: none; }
+    .link-btn--indigo:hover:not(:disabled) { color: var(--text-primary); }
+
+    /* Chips, Badges & Utilities */
+    .chip { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: var(--r-pill); background: var(--bg-chip); font: 600 11px/14px var(--font-body); letter-spacing: .44px; color: var(--text-secondary); }
+    .chip--blue-text { border-radius: var(--r-xs); padding: 2px 4px; color: var(--blue-soft); }
+    .chip--sync { background: var(--bg-card); padding: 6px 10px; border: 1px solid rgba(255,255,255,0.03); }
+    .chip--engine { padding: 5px 10px; color: var(--violet); background: rgba(208, 188, 255, 0.08); border: 1px solid rgba(208, 188, 255, 0.15); box-shadow: var(--shadow-card); }
+    .chip--count { color: var(--text-secondary); font-weight: 600; }
+    .chip--live { border-radius: var(--r-xs); padding: 2px 6px; background: rgba(208,188,255,.1); color: var(--violet); }
+    .chip--urgent { padding: 4px 8px; background: var(--danger); color: var(--danger-text); letter-spacing: 0.8px; text-transform: uppercase; }
+    .chip--confidence { padding: 4px 8px; color: var(--violet); background: rgba(208, 188, 255, 0.06); }
+
+    .dot { width: 8px; height: 8px; border-radius: var(--r-pill); background: var(--text-muted); flex-shrink: 0; }
+    .dot--violet { background: var(--violet); }
+    .dot--blue { background: var(--blue-soft); }
+    .dot--indigo { background: var(--indigo); }
+    .dot--danger { background: var(--danger-soft); }
+    .dot--pink { width: 6px; height: 6px; background: var(--danger-text); }
+
+    .sep { color: var(--text-muted); }
+    .mono { font: 700 13px/20px var(--font-mono); color: var(--blue-soft); }
+    .accent { color: var(--blue-soft); }
+    .eyebrow { font: 600 11px/14px var(--font-body); letter-spacing: .55px; text-transform: uppercase; color: var(--text-muted); }
+    .eyebrow--icon { display: flex; align-items: center; gap: 4px; }
+    .avatar { display: inline-grid; place-items: center; border-radius: var(--r-pill); overflow: hidden; background: linear-gradient(140deg, #4d8eff, #a078ff); font: 600 12px/1 var(--font-body); color: #fff; flex-shrink: 0; }
+
+    /* Cards */
+    .card { background: var(--bg-card); border-radius: var(--r-lg); box-shadow: var(--shadow-card); border: 1px solid rgba(255, 255, 255, 0.03); }
+
+    /* Greeting Section */
+    .greeting { position: relative; display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; padding-bottom: 24px; }
+    .greeting__copy { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; max-width: 640px; }
+    .greeting__title { font: 700 44px/52px var(--font-display); letter-spacing: -1px; }
+    .greeting__lead { font: 600 19px/26px var(--font-display); letter-spacing: -.2px; color: var(--text-secondary); }
+    .greeting__lead strong { font-weight: 600; color: var(--blue-soft); }
+    .metrics { display: flex; gap: 10px; flex-shrink: 0; }
+    .metric { display: flex; align-items: center; gap: 10px; padding: 6px 16px; background: var(--bg-card); border-radius: var(--r-md); border: 1px solid rgba(255,255,255,0.03); }
+    .metric__icon { display: grid; place-items: center; width: 32px; height: 32px; border-radius: var(--r-sm); background: var(--bg-chip); color: var(--blue-soft); }
+    .metric__label { font: 600 11px/14px var(--font-body); letter-spacing: .55px; text-transform: uppercase; color: var(--text-muted); }
+    .metric__value { font: 600 16px/24px var(--font-display); }
+    .metric__delta { font-size: 12px; color: var(--danger-soft); }
+
+    /* Hero Priority Card */
+    .hero { position: relative; overflow: hidden; margin-bottom: 32px; box-shadow: var(--shadow-hero); border: 1px solid rgba(255,255,255,0.05); }
+    .hero__glow { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(160,120,255,.12), rgba(77,142,255,.08) 50%, rgba(77,142,255,0)); pointer-events: none; }
+    .hero__edge { position: absolute; inset: 0 auto 0 0; width: 6px; background: linear-gradient(180deg, var(--violet), var(--blue) 50%, var(--indigo)); }
+    .hero__body { position: relative; padding: 32px; display: flex; flex-direction: column; gap: 18px; }
+    .hero__meta { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    .hero__badges { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .hero__detected { display: inline-flex; align-items: center; gap: 4px; font: 500 12px/16px var(--font-body); color: var(--text-muted); }
+    .hero__head { display: grid; grid-template-columns: minmax(0, 8fr) minmax(0, 4fr); gap: 24px; }
+    .hero__titles { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+    .hero__title { font: 700 30px/38px var(--font-display); letter-spacing: -.6px; }
+    .hero__sub { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font: 400 14px/22px var(--font-body); }
+    .tag { padding: 2px 8px; border-radius: var(--r-xs); background: var(--bg-item); font-weight: 500; }
+    .hero__expiry { display: flex; align-items: center; gap: 6px; font: 500 14px/22px var(--font-body); color: var(--danger-soft); }
+    .hero__price { display: flex; flex-direction: column; align-items: flex-end; text-align: right; }
+    .hero__amount { font: 700 44px/52px var(--font-display); letter-spacing: -1px; }
+    .hero__recommend { display: flex; align-items: center; gap: 4px; padding-top: 4px; font: 600 12px/16px var(--font-body); color: var(--blue-soft); }
+
+    .reasoning { display: flex; flex-direction: column; gap: 12px; padding: 20px 16px; border-radius: var(--r-md); background: var(--bg-reasoning); border: 1px solid rgba(255,255,255,0.03); }
+    .reasoning__flow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .reasoning__step { display: inline-flex; align-items: center; gap: 8px; }
+    .reasoning__arrow { color: var(--text-muted); }
+    .flow-tag { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: var(--r-sm); background: var(--bg-chip); font: 500 12px/16px var(--font-body); }
+    .flow-tag__src { color: var(--text-muted); }
+    .reasoning__narrative { font: 400 14px/22px var(--font-body); color: var(--text-secondary); }
+    .reasoning__narrative strong { font-weight: 600; color: var(--text-primary); }
+    .reasoning__narrative strong.accent { color: var(--blue-soft); }
+
+    .hero__actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding-top: 8px; }
+    .hero__primary, .hero__secondary { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+    /* Workspace 2-Column */
+    .workspace { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 24px; align-items: start; }
+    .workspace__col { display: flex; flex-direction: column; gap: 24px; min-width: 0; }
+    .workspace__col--main { grid-column: 1 / span 7; }
+    .workspace__col--side { grid-column: 8 / span 5; }
+
+    .panel { padding: 24px; display: flex; flex-direction: column; gap: 16px; }
+    .panel__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .panel__title-group { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .panel__icon { display: grid; place-items: center; width: 34px; height: 34px; border-radius: var(--r-sm); background: var(--bg-chip); color: var(--blue-soft); flex-shrink: 0; }
+    .panel__title { font: 700 19px/26px var(--font-display); letter-spacing: -.2px; }
+    .panel__sub { font: 400 12px/18px var(--font-body); color: var(--text-muted); }
+    .panel__range { font: 600 11px/14px var(--font-body); color: var(--text-muted); white-space: nowrap; }
+
+    .stack { display: flex; flex-direction: column; gap: 8px; }
+    .stack--tight { gap: 6px; }
+    .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; border-radius: var(--r-md); background: var(--bg-item); border: 1px solid rgba(255,255,255,0.02); }
+    .row--soft { padding: 8px 12px; background: var(--bg-item-soft); }
+    .row__main { display: flex; align-items: flex-start; gap: 10px; min-width: 0; }
+    .row__main--center { align-items: center; }
+    .row__icon { display: grid; place-items: center; width: 38px; height: 38px; border-radius: var(--r-md); background: var(--bg-chip-strong); color: var(--blue-soft); flex-shrink: 0; }
+    .row__text { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+    .row__title-line { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
+    .row__title { font: 600 15px/22px var(--font-display); }
+    .row__meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font: 400 12px/18px var(--font-body); color: var(--text-muted); }
+    .row__meta strong { font-weight: 600; color: var(--text-primary); }
+    .row__meta--danger { color: var(--danger-soft); }
+    .row__meta--soft { color: var(--text-secondary); gap: 6px; }
+
+    .badge { padding: 2px 6px; border-radius: var(--r-xs); font: 600 11px/14px var(--font-body); white-space: nowrap; }
+    .badge--danger { background: var(--danger-bg); color: var(--danger-soft); }
+    .badge--indigo { background: var(--indigo-bg); color: var(--indigo); }
+    .badge--neutral { background: var(--bg-chip-strong); color: var(--text-primary); }
+
+    .date-tile { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 44px; height: 40px; border-radius: var(--r-sm); background: var(--bg-chip); flex-shrink: 0; }
+    .date-tile__month { font: 600 10px/12px var(--font-body); text-transform: uppercase; color: var(--text-muted); }
+    .date-tile__day { font: 700 15px/16px var(--font-display); }
+    .status { padding: 3px 6px; border-radius: var(--r-xs); background: var(--bg-chip); font: 600 11px/14px var(--font-body); white-space: nowrap; }
+    .status--neutral { color: var(--text-primary); }
+    .status--indigo { color: var(--indigo); }
+    .status--muted { color: var(--text-muted); }
+
+    /* Load Chart */
+    .chart { display: flex; flex-direction: column; gap: 16px; padding: 16px; border-radius: var(--r-md); background: var(--bg-item); }
+    .chart__bars { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)) minmax(0, 1.4fr); gap: 8px; align-items: end; height: 144px; padding-top: 24px; }
+    .bar { display: flex; flex-direction: column; align-items: center; gap: 8px; justify-content: flex-end; cursor: pointer; }
+    .bar__value { font: 600 11px/14px var(--font-body); color: var(--text-muted); opacity: 0; transition: opacity .15s; }
+    .bar:hover .bar__value, .bar--spike .bar__value, .bar--protected .bar__value { opacity: 1; }
+    .bar__col { width: 100%; display: grid; place-items: center; border-radius: 6px 6px 0 0; transition: transform .15s, filter .15s; }
+    .bar:hover .bar__col { transform: scaleY(1.04); filter: brightness(1.15); }
+    .bar__label { font: 600 11px/14px var(--font-body); color: var(--text-muted); white-space: nowrap; }
+    .bar--blue .bar__col { background: var(--blue-soft); }
+    .bar--indigo .bar__col { background: var(--indigo); }
+    .bar--danger .bar__col { background: var(--danger-soft); }
+    .bar--danger .bar__value, .bar--danger .bar__label { color: var(--danger-soft); }
+    .bar--protected .bar__col { background: var(--bg-chip-strong); color: var(--violet); }
+    .bar--protected .bar__value, .bar--protected .bar__label { color: var(--violet); }
+    .chart__note { display: flex; gap: 6px; font: 400 12px/18px var(--font-body); color: var(--text-secondary); }
+    .chart__note svg { margin-top: 3px; color: var(--violet); }
+    .chart__note strong { font-weight: 600; color: var(--text-primary); }
+
+    /* Insights */
+    .insight { display: flex; gap: 10px; align-items: flex-start; padding: 16px; border-radius: var(--r-md); background: var(--bg-item); border: 1px solid rgba(255,255,255,0.02); }
+    .insight__icon { margin-top: 3px; color: var(--violet); }
+    .insight__icon--danger { color: var(--danger-soft); }
+    .insight__body { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+    .insight__title { font: 600 15px/22px var(--font-display); }
+    .insight__text { font: 400 12px/18px var(--font-body); color: var(--text-secondary); }
+    .insight__foot { display: flex; align-items: center; gap: 8px; padding-top: 6px; }
+    .insight__applied { font: 500 11px/14px var(--font-body); color: var(--blue-soft); }
+
+    /* Modal System */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 80;
+      background: rgba(0, 0, 0, 0.75);
+      -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+      display: grid; place-items: center; padding: 20px;
+      animation: modal-fade .15s ease-out;
+    }
+    .modal {
+      background: var(--bg-card); border-radius: var(--r-lg);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+      width: 100%; max-width: 580px; max-height: 90vh;
+      overflow-y: auto; display: flex; flex-direction: column;
+      animation: modal-scale .2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .modal__head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 24px; border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .modal__title { font: 700 18px/24px var(--font-display); }
+    .modal__body { padding: 24px; display: flex; flex-direction: column; gap: 16px; }
+    .modal__foot {
+      padding: 16px 24px; background: rgba(0,0,0,0.15);
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex; justify-content: flex-end; gap: 10px;
+    }
+    @keyframes modal-fade { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes modal-scale { from { transform: scale(0.96) translateY(8px); } to { transform: scale(1) translateY(0); } }
+
+    .input-field {
+      width: 100%; padding: 10px 14px; background: var(--bg-item);
+      border: 1px solid rgba(255, 255, 255, 0.08); border-radius: var(--r-sm);
+      color: var(--text-primary); font: 400 13px/18px var(--font-body);
+    }
+    .input-field:focus { outline: none; border-color: var(--blue-soft); }
+
+    /* Graph Visualizer */
+    .graph-node-container {
+      display: flex; flex-direction: column; gap: 12px;
+      padding: 16px; background: var(--bg-sidebar); border-radius: var(--r-md);
+    }
+    .graph-node {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 14px; background: var(--bg-item); border-radius: var(--r-sm);
+      border-left: 4px solid var(--blue-soft);
+    }
+    .graph-node--danger { border-left-color: var(--danger-soft); }
+    .graph-node--violet { border-left-color: var(--violet); }
+
+    /* Toasts */
+    .toasts { position: fixed; right: 24px; bottom: 24px; z-index: 90; display: flex; flex-direction: column; gap: 8px; }
+    .toast {
+      display: flex; align-items: center; gap: 10px; padding: 12px 18px;
+      border-radius: var(--r-md); background: #222632;
+      font: 500 13px/18px var(--font-body); box-shadow: 0 12px 30px rgba(0,0,0,.5);
+      border: 1px solid rgba(255,255,255,0.06); animation: toast-in .2s ease-out;
+    }
+    .toast--success svg { color: var(--blue-soft); }
+    .toast--error svg { color: var(--danger-soft); }
+    @keyframes toast-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+    /* Skeleton */
+    .state { max-width: 720px; margin: 0 auto; padding: 96px 24px; display: flex; flex-direction: column; gap: 16px; }
+    .skeleton { width: 100%; border-radius: var(--r-lg); background: linear-gradient(90deg, var(--bg-card), var(--bg-item), var(--bg-card)); background-size: 200% 100%; animation: shimmer 1.4s linear infinite; }
+    .skeleton--title { height: 56px; width: 60%; }
+    .skeleton--hero { height: 280px; }
+    .skeleton--row { height: 160px; }
+    @keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+
+    /* Responsive */
+    @media (max-width: 1180px) {
+      .workspace { grid-template-columns: 1fr; }
+      .workspace__col--main, .workspace__col--side { grid-column: 1; }
+      .greeting { flex-direction: column; align-items: flex-start; }
+    }
+    @media (max-width: 960px) {
+      .main { margin-left: 0; }
+      .sidebar { transform: translateX(-100%); transition: transform .2s ease; }
+      .sidebar--open { transform: none; }
+      .scrim { display: block; position: fixed; inset: 0; z-index: 35; background: rgba(0,0,0,.6); opacity: 0; pointer-events: none; transition: opacity .2s; }
+      .scrim--on { opacity: 1; pointer-events: auto; }
+      .header__menu { display: inline-grid; }
+      .chip--sync { display: none; }
+    }
+    @media (max-width: 720px) {
+      .header { padding: 0 12px; gap: 8px; }
+      .header__actions .btn span, .header__divider { display: none; }
+      .search__kbd { display: none; }
+      .content { padding: 24px 14px 48px; }
+      .greeting__title { font-size: 32px; line-height: 38px; }
+      .hero__body { padding: 20px 16px; }
+      .hero__head { grid-template-columns: 1fr; gap: 16px; }
+      .hero__price { align-items: flex-start; text-align: left; }
+      .row { flex-direction: column; align-items: stretch; }
+      .row .btn { width: 100%; }
+      .row--soft { flex-direction: row; align-items: center; }
+      .hero__primary .btn, .hero__actions { width: 100%; }
+      .toasts { left: 16px; right: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <!-- Main Application Script (Babel compiled React) -->
+  <script type="text/babel">
+    const { useState, useEffect, useRef, useCallback } = React;
+
+    // --- SVG Icon Component ---
+    const ICON_PATHS = {
+      home: ["M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"],
+      clock: ["o 12 12 9", "M12 7v5l3 2"],
+      sparkle: ["M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z", "M19 16v4 M17 18h4"],
+      inbox: ["M4 13l2-8h12l2 8v6H4z", "M4 13h5l1 2h4l1-2h5"],
+      graph: ["o 12 5 2", "o 5 18 2", "o 19 18 2", "M12 7v4 M12 11l-6 5 M12 11l6 5"],
+      refresh: ["M20 11a8 8 0 0 0-14-4L4 9 M4 4v5h5", "M4 13a8 8 0 0 0 14 4l2-2 M20 20v-5h-5"],
+      link: ["M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1", "M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"],
+      wallet: ["M3 7a2 2 0 0 1 2-2h13v4", "M3 7v11a2 2 0 0 0 2 2h15V9H5a2 2 0 0 1-2-2z", "M16 14h2"],
+      repeat: ["M17 2l4 4-4 4", "M3 11V9a3 3 0 0 1 3-3h15", "M7 22l-4-4 4-4", "M21 13v2a3 3 0 0 1-3 3H3"],
+      folder: ["M3 6a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"],
+      bell: ["M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9", "M10 21a2 2 0 0 0 4 0"],
+      chart: ["M4 20V10 M10 20V4 M16 20v-8 M22 20H2"],
+      settings: ["o 12 12 3", "M12 2v3 M12 19v3 M4.2 4.2l2.1 2.1 M17.7 17.7l2.1 2.1 M2 12h3 M19 12h3 M4.2 19.8l2.1-2.1 M17.7 6.3l2.1-2.1"],
+      logout: ["M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4", "M16 17l5-5-5-5 M21 12H9"],
+      search: ["o 11 11 7", "M20 20l-3.5-3.5"],
+      plus: ["M12 5v14 M5 12h14"],
+      bolt: ["M13 2 4 14h7l-1 8 9-12h-7z"],
+      mail: ["M3 6h18v12H3z", "M3 7l9 6 9-6"],
+      calendar: ["M4 6h16v14H4z", "M4 10h16 M8 3v4 M16 3v4"],
+      trend: ["M3 17l6-6 4 4 8-8", "M15 7h6v6"],
+      route: ["M3 11l18-8-8 18-2-8z"],
+      review: ["M3 5h18v12H8l-5 4z"],
+      shield: ["M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z", "M9 12l2 2 4-4"],
+      brain: ["M9 4a3 3 0 0 0-3 3 3 3 0 0 0-2 5 3 3 0 0 0 2 5 3 3 0 0 0 6 1V4a3 3 0 0 0-3 0z", "M15 4a3 3 0 0 1 3 3 3 3 0 0 1 2 5 3 3 0 0 1-2 5 3 3 0 0 1-3 1"],
+      lock: ["M6 11h12v10H6z", "M8 11V7a4 4 0 0 1 8 0v4"],
+      alert: ["M12 3l10 18H2z", "M12 10v5 M12 18v.5"],
+      arrow: ["M5 12h14 M13 6l6 6-6 6"],
+      external: ["M14 4h6v6 M20 4l-9 9", "M18 14v6H4V6h6"],
+      snooze: ["o 12 13 8", "M12 9v4l2 2 M4 4l3-2 M20 4l-3-2"],
+      delegate: ["M15 20v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2", "o 8.5 7 4", "M19 8v6 M22 11h-6"],
+      medical: ["M4 4h16v16H4z", "M12 8v8 M8 12h8"],
+      menu: ["M4 6h16 M4 12h16 M4 18h16"],
+      close: ["M6 6l12 12 M18 6L6 18"],
+      chartSearch: ["M4 20V10 M10 20V4 M16 20v-6", "o 18 15 3", "M20.5 17.5 22 19"],
+      neural: ["o 12 12 2", "M12 4v6 M12 14v6 M4 12h6 M14 12h6", "o 12 3 1", "o 12 21 1", "o 3 12 1", "o 21 12 1"],
+      check: ["M5 12l5 5L20 7"],
+      cloud: ["M7 18a4 4 0 0 1-.5-8A6 6 0 0 1 18 9a4.5 4.5 0 0 1-.5 9z"],
+      passport: ["M6 3h12v18H6z", "o 12 11 3", "M9 17h6"],
+    };
+
+    function Icon({ name, size = 16, strokeWidth = 1.75, className = "" }) {
+      const parts = ICON_PATHS[name] || [];
+      return (
+        <svg
+          width={size}
+          height={size}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={strokeWidth}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className={className}
+        >
+          {parts.map((p, i) => {
+            if (p.startsWith("o ")) {
+              const [, cx, cy, r] = p.split(" ");
+              return <circle key={i} cx={cx} cy={cy} r={r} />;
+            }
+            return <path key={i} d={p} />;
+          })}
+        </svg>
+      );
+    }
+
+    const formatINR = (n) =>
+      new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(n);
+
+    // Initial Dashboard Mock Data (Fallback & Baseline)
+    const initialData = {
+      user: { name: "Arun V.", shortName: "Arun", email: "arun@lifesync.ai" },
+      sync: { appsSynced: 6, lastSyncedLabel: "2m ago", sourcesCount: 6 },
+      metrics: {
+        cognitiveLoadPct: 68,
+        cognitiveLoadDeltaPct: 32,
+        automationHealthPct: 100,
+        criticalObligations: 3,
+      },
+      priority: {
+        id: "ob_insurance_001",
+        urgency: "high",
+        confidencePct: 98,
+        detectedLabel: "Detected 14m ago from Gmail & Vahan Ledger",
+        title: "Vehicle Insurance Renewal",
+        provider: "HDFC ERGO Comprehensive",
+        reference: "Hyundai Creta KA-01-MJ-4021",
+        expiryLabel: "Expires Oct 15, 2026 (6 days away)",
+        amount: 8420,
+        currency: "INR",
+        recommendation: "LifeSync Recommends: Renew by Oct 11",
+        reasoning: [
+          { id: "r1", source: "Gmail:", detail: "Policy Expiry Detected", tone: "danger" },
+          { id: "r2", source: "Calendar:", detail: "Goa Road Trip on Oct 17", tone: "indigo" },
+          { id: "r3", source: "Historical Pattern:", detail: "Endorsement takes 2–3 Days", tone: "violet" },
+          { id: "r4", source: "User Rule:", detail: "Avoid Weekend Processing", tone: "blue" },
+        ],
+        narrative: {
+          before: "Your road trip begins ",
+          date1: "October 17",
+          middle: ". Because digital policy endorsement takes 2–3 business days at HDFC ERGO, renewing on ",
+          date2: "Friday, October 11",
+          after: " guarantees active coverage and road hazard assistance before departure without encountering weekend banking freezes.",
+        },
+        primaryActionLabel: "Handle Now",
+      },
+      adminItems: [
+        {
+          id: "adm_bescom",
+          icon: "bolt",
+          title: "Electricity Bill (BESCOM Bangalore)",
+          badge: { label: "Due Tomorrow", tone: "danger" },
+          amountLabel: "₹2,340",
+          meta: "Discovered via Gmail PDF",
+          metaIcon: "mail",
+          action: { label: "Quick Pay", variant: "primary", icon: "bolt" },
+        },
+        {
+          id: "adm_doctor",
+          icon: "doctor",
+          title: "Dr. Sharma Consultation",
+          badge: { label: "Today @ 4:30 PM", tone: "indigo" },
+          meta: "Apollo Specialty Hospital, Indiranagar",
+          metaIcon: "calendar",
+          action: { label: "View Directions & Prep", variant: "secondary", icon: "route" },
+        },
+        {
+          id: "adm_figma",
+          icon: "sparkle",
+          title: "Figma Professional Plan",
+          badge: { label: "Renews Tomorrow", tone: "neutral" },
+          amountLabel: "₹1,299/mo",
+          meta: "Alert: Price increased by ₹200",
+          metaIcon: "trend",
+          metaTone: "danger",
+          action: { label: "Review", variant: "secondary", icon: "review" },
+        },
+      ],
+      upcomingRange: "Oct 12 – Oct 20",
+      upcoming: [
+        {
+          id: "up_service",
+          month: "Oct",
+          day: "14",
+          title: "Vehicle General Service Check",
+          subtitle: "Mandatory prep for Goa road trip • Advaith Hyundai",
+          status: { label: "Confirmed", tone: "neutral" },
+        },
+        {
+          id: "up_card",
+          month: "Oct",
+          day: "18",
+          title: "HDFC Regalia Credit Card Statement",
+          amountLabel: "₹42,850",
+          subtitle: "total balance • Auto-debit verified on HDFC Netbanking",
+          status: { label: "Auto-Pay Ready", tone: "indigo" },
+        },
+        {
+          id: "up_water",
+          month: "Oct",
+          day: "20",
+          title: "Water Utility Board (BWSSB)",
+          amountLabel: "₹680",
+          subtitle: "Utility threshold within normal monthly consumption",
+          status: { label: "Queued", tone: "muted" },
+        },
+      ],
+      load: {
+        percentHigher: 32,
+        shiftedTasks: 2,
+        days: [
+          { id: "mon", label: "Mon", value: 3, heightPx: 56, tone: "blue" },
+          { id: "tue", label: "Tue", value: 5, heightPx: 80, tone: "indigo" },
+          { id: "wed", label: "Wed", value: 2, heightPx: 40, tone: "blue" },
+          { id: "thu", label: "Thu 15", value: 7, heightPx: 112, tone: "danger" },
+          { id: "fri", label: "Fri", value: 3, heightPx: 56, tone: "blue" },
+          { id: "wknd", label: "Sat/Sun", heightPx: 32, tone: "protected" },
+        ],
+      },
+      insights: [
+        {
+          id: "in_collision",
+          kind: "collision",
+          title: "Trip Travel Window Collision",
+          body: "Insurance renewal window directly collides with your road trip travel day. Pre-authorizing renewal on Oct 11 prevents policy gap while en route.",
+          cta: { label: "View Dependency", kind: "link" },
+          applied: true,
+        },
+        {
+          id: "in_subs",
+          kind: "subscription",
+          title: "Subscription Overlap Detected",
+          body: "2 cloud subscriptions (Google One 2TB & iCloud+ 2TB) possess overlapping storage quotas. Consolidating can save ",
+          highlight: "₹1,200/mo",
+          cta: { label: "Initiate Cloud Audit", kind: "button" },
+        },
+        {
+          id: "in_passport",
+          kind: "document",
+          title: "Passport Validity Threshold",
+          body: "Your Indian Passport expires in 6 months (June 2027). International travel restrictions apply to visas with <6 months validity.",
+          cta: { label: "Pre-fill Tatkaal Renewal Form", kind: "external" },
+        },
+      ],
+    };
+
+    const navSections = [
+      {
+        id: "core",
+        label: "Core",
+        items: [
+          { id: "dashboard", label: "Dashboard", icon: "home" },
+          { id: "timeline", label: "Intelligent Timeline", icon: "clock" },
+          { id: "planner", label: "AI Planner", icon: "sparkle" },
+          { id: "inbox", label: "Universal Inbox", icon: "inbox", badge: { label: "8 new", tone: "indigo" } },
+        ],
+      },
+      {
+        id: "graph",
+        label: "Intelligence & Graph",
+        items: [
+          { id: "graph", label: "Relationship Graph", icon: "graph" },
+          { id: "automations", label: "Automations", icon: "refresh" },
+        ],
+      },
+      {
+        id: "ecosystem",
+        label: "Ecosystem",
+        items: [
+          { id: "apps", label: "Connected Apps", icon: "link", badge: { label: "6 active", tone: "neutral" } },
+          { id: "payments", label: "Payments & Ledger", icon: "wallet" },
+          { id: "subscriptions", label: "Subscriptions", icon: "repeat" },
+          { id: "vault", label: "Document Vault", icon: "folder" },
+        ],
+      },
+      {
+        id: "system",
+        label: "System",
+        items: [
+          { id: "notifications", label: "Notifications", icon: "bell", badge: { label: "3", tone: "danger" } },
+          { id: "analytics", label: "Insights & Analytics", icon: "chart" },
+        ],
+      },
+    ];
+
+    // --- Unified Backend & Network Seam ---
+    const backend = {
+      async getDashboard() {
+        try {
+          const res = await fetch("/api/dashboard");
+          if (res.ok) return await res.json();
+        } catch (e) {
+          /* Fallback to local memory */
+        }
+        await new Promise((r) => setTimeout(r, 200));
+        return JSON.parse(JSON.stringify(initialData));
+      },
+
+      async payObligation(id) {
+        try {
+          const res = await fetch(`/api/obligations/${encodeURIComponent(id)}/pay`, { method: "POST" });
+          if (res.ok) return await res.json();
+        } catch (e) {}
+        await new Promise((r) => setTimeout(r, 500));
+        return { ok: true, message: "Payment initiated for Vehicle Insurance (₹8,420)" };
+      },
+
+      async snoozeObligation(id, days) {
+        try {
+          const res = await fetch(`/api/obligations/${encodeURIComponent(id)}/snooze`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ days }),
+          });
+          if (res.ok) return await res.json();
+        } catch (e) {}
+        await new Promise((r) => setTimeout(r, 300));
+        return { ok: true, message: `Snoozed for ${days} days` };
+      },
+
+      async delegateObligation(id) {
+        try {
+          const res = await fetch(`/api/obligations/${encodeURIComponent(id)}/delegate`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ delegate: "ca" }),
+          });
+          if (res.ok) return await res.json();
+        } catch (e) {}
+        await new Promise((r) => setTimeout(r, 300));
+        return { ok: true, message: "Sent to your CA with tax exemption context" };
+      },
+
+      async runAdminAction(id) {
+        try {
+          const res = await fetch(`/api/admin-items/${encodeURIComponent(id)}/action`, { method: "POST" });
+          if (res.ok) return await res.json();
+        } catch (e) {}
+        await new Promise((r) => setTimeout(r, 400));
+        return { ok: true, message: "Action executed successfully" };
+      },
+
+      async applyInsight(id) {
+        try {
+          const res = await fetch(`/api/insights/${encodeURIComponent(id)}/apply`, { method: "POST" });
+          if (res.ok) return await res.json();
+        } catch (e) {}
+        await new Promise((r) => setTimeout(r, 400));
+        return { ok: true, message: "Proactive Insight applied to schedule" };
+      },
+
+      async search(q) {
+        try {
+          const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
+          if (res.ok) return await res.json();
+        } catch (e) {}
+        const pool = [
+          { id: "ob_insurance_001", title: "Vehicle Insurance Renewal (HDFC ERGO)", type: "Priority Obligation" },
+          { id: "adm_bescom", title: "Electricity Bill (BESCOM Bangalore)", type: "Critical Admin" },
+          { id: "adm_doctor", title: "Dr. Sharma Consultation", type: "Critical Admin" },
+          { id: "adm_figma", title: "Figma Professional Plan", type: "Subscription" },
+          { id: "up_service", title: "Vehicle General Service Check", type: "Upcoming" },
+          { id: "up_card", title: "HDFC Regalia Credit Card Statement", type: "Upcoming" },
+          { id: "up_water", title: "Water Utility Board (BWSSB)", type: "Upcoming" },
+        ];
+        return { results: pool.filter((p) => p.title.toLowerCase().includes(q.toLowerCase())) };
+      },
+
+      async askAI(prompt) {
+        try {
+          const res = await fetch("/api/ask", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ prompt }),
+          });
+          if (res.ok) return await res.json();
+        } catch (e) {}
+        await new Promise((r) => setTimeout(r, 600));
+        return {
+          ok: true,
+          response: `LifeSync Neural Engine has cross-correlated your Gmail receipts, Vahan vehicle ledger, and Calendar Goa trip. Paying your vehicle insurance by October 11 avoids weekend endorsement lags before your departure on October 17.`,
+        };
+      },
+
+      async quickAdd(title, amount) {
+        try {
+          const res = await fetch("/api/quick-add", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ title, amount }),
+          });
+          if (res.ok) return await res.json();
+        } catch (e) {}
+        return { ok: true, message: `Added "${title}" to your queue` };
+      },
+    };
+
+    // --- Main App Component ---
+    function App() {
+      const [data, setData] = useState(null);
+      const [loading, setLoading] = useState(true);
+      const [busy, setBusy] = useState({});
+      const [done, setDone] = useState({});
+      const [toasts, setToasts] = useState([]);
+      const [navOpen, setNavOpen] = useState(false);
+      const [activeNav, setActiveNav] = useState("dashboard");
+
+      // Modals State
+      const [aiModalOpen, setAiModalOpen] = useState(false);
+      const [quickAddOpen, setQuickAddOpen] = useState(false);
+      const [graphModalOpen, setGraphModalOpen] = useState(false);
+      const [aiPrompt, setAiPrompt] = useState("");
+      const [aiResponse, setAiResponse] = useState(null);
+      const [aiBusy, setAiBusy] = useState(false);
+
+      // Quick Add form state
+      const [qaTitle, setQaTitle] = useState("");
+      const [qaAmount, setQaAmount] = useState("");
+
+      // Search State
+      const [searchQuery, setSearchQuery] = useState("");
+      const [searchResults, setSearchResults] = useState([]);
+      const searchRef = useRef(null);
+
+      const pushToast = useCallback((message, tone = "success") => {
+        const id = Date.now() + Math.random();
+        setToasts((prev) => [...prev, { id, message, tone }]);
+        setTimeout(() => {
+          setToasts((prev) => prev.filter((t) => t.id !== id));
+        }, 3500);
+      }, []);
+
+      const loadData = useCallback(async () => {
+        setLoading(true);
+        try {
+          const res = await backend.getDashboard();
+          setData(res);
+        } catch (err) {
+          pushToast("Could not load dashboard", "error");
+        } finally {
+          setLoading(false);
+        }
+      }, [pushToast]);
+
+      useEffect(() => {
+        loadData();
+      }, [loadData]);
+
+      // Keyboard Shortcut (⌘K / Ctrl+K)
+      useEffect(() => {
+        const onKeyDown = (e) => {
+          if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+            e.preventDefault();
+            searchRef.current?.focus();
+          }
+        };
+        window.addEventListener("keydown", onKeyDown);
+        return () => window.removeEventListener("keydown", onKeyDown);
+      }, []);
+
+      // Search Handler
+      const handleSearch = async (val) => {
+        setSearchQuery(val);
+        if (!val.trim()) {
+          setSearchResults([]);
+          return;
+        }
+        const res = await backend.search(val);
+        setSearchResults(res.results || []);
+      };
+
+      const runAction = async (key, fn, markDone = false) => {
+        setBusy((b) => ({ ...b, [key]: true }));
+        try {
+          const res = await fn();
+          pushToast(res.message, res.ok ? "success" : "error");
+          if (res.ok && markDone) setDone((d) => ({ ...d, [key]: true }));
+        } catch (e) {
+          pushToast("Action failed", "error");
+        } finally {
+          setBusy((b) => ({ ...b, [key]: false }));
+        }
+      };
+
+      const handleAskAI = async (customPrompt) => {
+        const query = customPrompt || aiPrompt;
+        if (!query.trim()) return;
+        setAiBusy(true);
+        setAiResponse(null);
+        try {
+          const res = await backend.askAI(query);
+          setAiResponse(res.response);
+        } catch (e) {
+          setAiResponse("AI assistant is processing in background. All rules validated.");
+        } finally {
+          setAiBusy(false);
+        }
+      };
+
+      const handleQuickAddSubmit = async (e) => {
+        e.preventDefault();
+        if (!qaTitle.trim()) return;
+        const res = await backend.quickAdd(qaTitle, qaAmount);
+        pushToast(res.message, "success");
+        if (data) {
+          setData({
+            ...data,
+            metrics: {
+              ...data.metrics,
+              criticalObligations: data.metrics.criticalObligations + 1,
+            },
+            adminItems: [
+              {
+                id: "adm_" + Date.now(),
+                icon: "sparkle",
+                title: qaTitle,
+                badge: { label: "New", tone: "indigo" },
+                amountLabel: qaAmount ? `₹${qaAmount}` : undefined,
+                meta: "Created via Quick Add",
+                action: { label: "Review", variant: "primary", icon: "review" },
+              },
+              ...data.adminItems,
+            ],
+          });
+        }
+        setQaTitle("");
+        setQaAmount("");
+        setQuickAddOpen(false);
+      };
+
+      if (loading || !data) {
+        return (
+          <div className="state" aria-busy="true">
+            <div className="skeleton skeleton--title" />
+            <div className="skeleton skeleton--hero" />
+            <div className="skeleton skeleton--row" />
+          </div>
+        );
+      }
+
+      const { user, sync, metrics, priority, adminItems, upcoming, upcomingRange, load, insights } = data;
+
+      return (
+        <div className="shell">
+          {/* Sidebar Drawer Scrim for Mobile */}
+          <div
+            className={`scrim ${navOpen ? "scrim--on" : ""}`}
+            onClick={() => setNavOpen(false)}
+          />
+
+          {/* Sidebar Navigation */}
+          <aside className={`sidebar ${navOpen ? "sidebar--open" : ""}`}>
+            <div className="sidebar__brand">
+              <div className="brand">
+                <span className="brand__logo">
+                  <Icon name="neural" size={18} />
+                </span>
+                <span className="brand__name">LifeSync AI</span>
+              </div>
+              <span className="chip chip--blue-text">OS v2.4</span>
+            </div>
+
+            <nav className="sidebar__nav">
+              {navSections.map((section) => (
+                <div className="nav-section" key={section.id}>
+                  <p className="nav-section__label">{section.label}</p>
+                  {section.items.map((item) => {
+                    const active = item.id === activeNav;
+                    return (
+                      <a
+                        key={item.id}
+                        href="#"
+                        className={`nav-link ${active ? "nav-link--active" : ""}`}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setActiveNav(item.id);
+                          setNavOpen(false);
+                        }}
+                      >
+                        <span className="nav-link__main">
+                          <Icon name={item.icon} size={16} />
+                          <span>{item.label}</span>
+                        </span>
+                        {item.badge && (
+                          <span className={`nav-badge nav-badge--${item.badge.tone}`}>
+                            {item.badge.label}
+                          </span>
+                        )}
+                      </a>
+                    );
+                  })}
+                </div>
+              ))}
+            </nav>
+
+            <div className="sidebar__footer">
+              <div className="status-card">
+                <span className="dot dot--violet" />
+                <div className="status-card__text">
+                  <p className="status-card__title">Personal Intelligence Active</p>
+                  <p className="status-card__sub">6 High-Confidence Integrations</p>
+                </div>
+              </div>
+              <a href="#" className="nav-link" onClick={(e) => e.preventDefault()}>
+                <span className="nav-link__main">
+                  <Icon name="settings" size={16} />
+                  <span>Settings &amp; Preferences</span>
+                </span>
+              </a>
+              <div className="profile">
+                <div className="profile__who">
+                  <span className="avatar" style={{ width: 32, height: 32 }}>
+                    <span>{user.shortName[0]}</span>
+                  </span>
+                  <div>
+                    <p className="profile__name">{user.name}</p>
+                    <p className="profile__email">{user.email}</p>
+                  </div>
+                </div>
+                <button className="icon-btn icon-btn--sm" aria-label="Sign out">
+                  <Icon name="logout" size={16} />
+                </button>
+              </div>
+            </div>
+          </aside>
+
+          {/* Main Layout Area */}
+          <div className="main">
+            {/* Top Navigation Bar */}
+            <header className="header">
+              <button
+                className="icon-btn header__menu"
+                onClick={() => setNavOpen(true)}
+                aria-label="Open navigation"
+              >
+                <Icon name="menu" size={20} />
+              </button>
+
+              <div className="search">
+                <Icon name="search" size={14} className="search__icon" />
+                <input
+                  ref={searchRef}
+                  type="search"
+                  className="search__input"
+                  placeholder="Search obligations, documents, subscriptions, apps..."
+                  value={searchQuery}
+                  onChange={(e) => handleSearch(e.target.value)}
+                />
+                <kbd className="search__kbd">⌘K</kbd>
+
+                {searchQuery && (
+                  <div className="search-dropdown">
+                    {searchResults.length > 0 ? (
+                      searchResults.map((item) => (
+                        <div
+                          key={item.id}
+                          className="search-item"
+                          onClick={() => {
+                            pushToast(`Navigated to ${item.title}`);
+                            setSearchQuery("");
+                          }}
+                        >
+                          <span className="search-item__title">{item.title}</span>
+                          <span className="search-item__type">{item.type}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <div style={{ padding: "10px", color: "var(--text-muted)", fontSize: 12 }}>
+                        No matching results
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div className="header__actions">
+                <button className="btn btn--ghost-violet" onClick={() => setAiModalOpen(true)}>
+                  <Icon name="sparkle" size={14} />
+                  <span>Ask LifeSync AI</span>
+                </button>
+                <button className="btn btn--blue" onClick={() => setQuickAddOpen(true)}>
+                  <Icon name="plus" size={12} strokeWidth={2.5} />
+                  <span>Quick Add</span>
+                </button>
+                <span className="header__divider" aria-hidden="true" />
+                <span className="chip chip--sync">
+                  <span className="dot dot--blue" />
+                  {sync.appsSynced} Apps Synced ({sync.lastSyncedLabel})
+                </span>
+                <button
+                  className="icon-btn header__bell"
+                  onClick={() => pushToast("3 unread automated sync notifications")}
+                  aria-label="Notifications"
+                >
+                  <Icon name="bell" size={16} />
+                  <span className="header__bell-dot" />
+                </button>
+                <span className="avatar" style={{ width: 32, height: 32 }}>
+                  <span>{user.shortName[0]}</span>
+                </span>
+              </div>
+            </header>
+
+            {/* Dashboard Workspace */}
+            <main className="content">
+              {/* Background Ambient Glow */}
+              <div className="aura" aria-hidden="true">
+                <span className="aura__a" />
+                <span className="aura__b" />
+              </div>
+
+              {/* Greeting & Metrics Bar */}
+              <section className="greeting">
+                <div className="greeting__copy">
+                  <span className="chip chip--engine">
+                    ✦ LifeSync Neural Engine is actively synchronizing {sync.sourcesCount} data sources
+                  </span>
+                  <h1 className="greeting__title">
+                    Good afternoon, {user.shortName}.
+                  </h1>
+                  <p className="greeting__lead">
+                    You have <strong>{metrics.criticalObligations} critical obligations</strong> requiring decisive attention this week.
+                  </p>
+                </div>
+
+                <div className="metrics">
+                  <div className="metric">
+                    <span className="metric__icon">
+                      <Icon name="brain" size={14} />
+                    </span>
+                    <div>
+                      <p className="metric__label">Cognitive Load</p>
+                      <p className="metric__value">
+                        {metrics.cognitiveLoadPct}%{" "}
+                        <span className="metric__delta">(+{metrics.cognitiveLoadDeltaPct}%)</span>
+                      </p>
+                    </div>
+                  </div>
+                  <div className="metric">
+                    <span className="metric__icon">
+                      <Icon name="shield" size={14} />
+                    </span>
+                    <div>
+                      <p className="metric__label">Automation Health</p>
+                      <p className="metric__value">{metrics.automationHealthPct}% Guarded</p>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* Priority Hero Card */}
+              <section className="hero card">
+                <span className="hero__glow" aria-hidden="true" />
+                <span className="hero__edge" aria-hidden="true" />
+
+                <div className="hero__body">
+                  <div className="hero__meta">
+                    <div className="hero__badges">
+                      <span className="chip chip--urgent">
+                        <span className="dot dot--pink" />
+                        Priority #1 • High Urgency
+                      </span>
+                      <span className="chip chip--confidence">
+                        <Icon name="sparkle" size={12} />
+                        {priority.confidencePct}% AI Confidence
+                      </span>
+                    </div>
+                    <span className="hero__detected">
+                      <Icon name="calendar" size={12} />
+                      {priority.detectedLabel}
+                    </span>
+                  </div>
+
+                  <div className="hero__head">
+                    <div className="hero__titles">
+                      <h2 className="hero__title">{priority.title}</h2>
+                      <div className="hero__sub">
+                        <span className="tag">{priority.provider}</span>
+                        <span className="sep">•</span>
+                        <span className="mono">{priority.reference}</span>
+                      </div>
+                      <p className="hero__expiry">
+                        <Icon name="alert" size={13} />
+                        {priority.expiryLabel}
+                      </p>
+                    </div>
+
+                    <div className="hero__price">
+                      <p className="eyebrow">Premium Payable</p>
+                      <p className="hero__amount">{formatINR(priority.amount)}</p>
+                      <p className="hero__recommend">
+                        <Icon name="bolt" size={12} />
+                        {priority.recommendation}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Causal Reasoning Graph */}
+                  <div className="reasoning">
+                    <p className="eyebrow eyebrow--icon">
+                      <Icon name="graph" size={13} />
+                      Causal Reasoning Graph
+                    </p>
+                    <ul className="reasoning__flow">
+                      {priority.reasoning.map((step, i) => (
+                        <li className="reasoning__step" key={step.id}>
+                          <span className="flow-tag">
+                            <span className={`dot dot--${step.tone}`} />
+                            <span className="flow-tag__src">{step.source}</span>
+                            <span className="flow-tag__detail">{step.detail}</span>
+                          </span>
+                          {i < priority.reasoning.length - 1 && (
+                            <Icon name="arrow" size={12} className="reasoning__arrow" />
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                    <p className="reasoning__narrative">
+                      {priority.narrative.before}
+                      <strong>{priority.narrative.date1}</strong>
+                      {priority.narrative.middle}
+                      <strong className="accent">{priority.narrative.date2}</strong>
+                      {priority.narrative.after}
+                    </p>
+                  </div>
+
+                  {/* Hero Actions */}
+                  <div className="hero__actions">
+                    <div className="hero__primary">
+                      <button
+                        className="btn btn--lg btn--soft-blue"
+                        onClick={() =>
+                          runAction(
+                            `pay:${priority.id}`,
+                            () => backend.payObligation(priority.id),
+                            true
+                          )
+                        }
+                        disabled={busy[`pay:${priority.id}`] || done[`pay:${priority.id}`]}
+                      >
+                        <Icon name={done[`pay:${priority.id}`] ? "check" : "lock"} size={14} />
+                        {done[`pay:${priority.id}`]
+                          ? "Payment Initiated"
+                          : busy[`pay:${priority.id}`]
+                          ? "Processing Transaction…"
+                          : `${priority.primaryActionLabel} • Pay ${formatINR(priority.amount)}`}
+                      </button>
+                      <button
+                        className="btn btn--lg btn--chip"
+                        onClick={() => setGraphModalOpen(true)}
+                      >
+                        <Icon name="graph" size={15} />
+                        Inspect Relationship Graph
+                      </button>
+                    </div>
+
+                    <div className="hero__secondary">
+                      <button
+                        className="btn btn--text"
+                        onClick={() =>
+                          runAction(`snooze:${priority.id}`, () =>
+                            backend.snoozeObligation(priority.id, 2)
+                          )
+                        }
+                      >
+                        <Icon name="snooze" size={14} />
+                        Snooze 2 Days
+                      </button>
+                      <button
+                        className="btn btn--text"
+                        onClick={() =>
+                          runAction(`delegate:${priority.id}`, () =>
+                            backend.delegateObligation(priority.id)
+                          )
+                        }
+                      >
+                        <Icon name="delegate" size={14} />
+                        Delegate to CA
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* Two-Column Grid */}
+              <div className="workspace">
+                {/* Main Column */}
+                <div className="workspace__col workspace__col--main">
+                  {/* Today's Critical Admin */}
+                  <section className="card panel">
+                    <div className="panel__head">
+                      <div className="panel__title-group">
+                        <span className="panel__icon">
+                          <Icon name="bolt" size={14} />
+                        </span>
+                        <div>
+                          <h3 className="panel__title">Today's Critical Admin</h3>
+                          <p className="panel__sub">Actionable friction items queued for execution</p>
+                        </div>
+                      </div>
+                      <span className="chip chip--count">{adminItems.length} Actions</span>
+                    </div>
+
+                    <ul className="stack">
+                      {adminItems.map((item) => {
+                        const isBusy = busy[`admin:${item.id}`];
+                        const isDone = done[`admin:${item.id}`];
+                        return (
+                          <li className="row" key={item.id}>
+                            <div className="row__main">
+                              <span className="row__icon">
+                                <Icon
+                                  name={item.icon === "doctor" ? "medical" : item.icon}
+                                  size={16}
+                                />
+                              </span>
+                              <div className="row__text">
+                                <div className="row__title-line">
+                                  <h4 className="row__title">{item.title}</h4>
+                                  {item.badge && (
+                                    <span className={`badge badge--${item.badge.tone}`}>
+                                      {item.badge.label}
+                                    </span>
+                                  )}
+                                </div>
+                                <p
+                                  className={`row__meta ${
+                                    item.metaTone === "danger" ? "row__meta--danger" : ""
+                                  }`}
+                                >
+                                  {item.amountLabel && (
+                                    <>
+                                      <strong>{item.amountLabel}</strong>
+                                      <span className="sep">•</span>
+                                    </>
+                                  )}
+                                  {item.metaIcon && <Icon name={item.metaIcon} size={11} />}
+                                  <span>{item.meta}</span>
+                                </p>
+                              </div>
+                            </div>
+                            <button
+                              className={`btn btn--sm ${
+                                item.action.variant === "primary" ? "btn--blue" : "btn--chip"
+                              }`}
+                              onClick={() =>
+                                runAction(
+                                  `admin:${item.id}`,
+                                  () => backend.runAdminAction(item.id),
+                                  true
+                                )
+                              }
+                              disabled={isBusy || isDone}
+                            >
+                              <Icon name={isDone ? "check" : item.action.icon} size={12} />
+                              {isDone ? "Done" : isBusy ? "Working…" : item.action.label}
+                            </button>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </section>
+
+                  {/* Upcoming This Week */}
+                  <section className="card panel">
+                    <div className="panel__head">
+                      <div className="panel__title-group">
+                        <span className="panel__icon">
+                          <Icon name="calendar" size={14} />
+                        </span>
+                        <div>
+                          <h3 className="panel__title">Upcoming This Week</h3>
+                          <p className="panel__sub">Synthesized timeline for pre-trip stability</p>
+                        </div>
+                      </div>
+                      <span className="panel__range">{upcomingRange}</span>
+                    </div>
+
+                    <ul className="stack stack--tight">
+                      {upcoming.map((u) => (
+                        <li className="row row--soft" key={u.id}>
+                          <div className="row__main row__main--center">
+                            <span className="date-tile">
+                              <span className="date-tile__month">{u.month}</span>
+                              <span className="date-tile__day">{u.day}</span>
+                            </span>
+                            <div className="row__text">
+                              <h4 className="row__title">{u.title}</h4>
+                              <p className="row__meta row__meta--soft">
+                                {u.amountLabel && <strong>{u.amountLabel}</strong>}
+                                <span>{u.subtitle}</span>
+                              </p>
+                            </div>
+                          </div>
+                          <span className={`status status--${u.status.tone}`}>
+                            {u.status.label}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
+                </div>
+
+                {/* Side Column */}
+                <div className="workspace__col workspace__col--side">
+                  {/* Obligation Load & Strain Chart */}
+                  <section className="card panel">
+                    <div className="panel__head">
+                      <div>
+                        <h3 className="panel__title">Obligation Load &amp; Strain</h3>
+                        <p className="panel__sub">Computational projection across next 7 days</p>
+                      </div>
+                      <Icon name="chartSearch" size={20} className="panel__head-icon" />
+                    </div>
+
+                    <div className="chart">
+                      <div className="chart__bars">
+                        {load.days.map((d) => {
+                          const isProtected = d.tone === "protected";
+                          const isSpike = d.tone === "danger";
+                          return (
+                            <div
+                              className={`bar bar--${d.tone} ${isSpike ? "bar--spike" : ""}`}
+                              key={d.id}
+                              tabIndex={isProtected ? -1 : 0}
+                            >
+                              <span className="bar__value">
+                                {isProtected ? "Protected" : `${d.value} items`}
+                              </span>
+                              <span className="bar__col" style={{ height: d.heightPx }}>
+                                {isProtected && <Icon name="lock" size={11} />}
+                              </span>
+                              <span className="bar__label">{d.label}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      <p className="chart__note">
+                        <Icon name="sparkle" size={12} />
+                        <span>
+                          Administrative load is{" "}
+                          <strong>{load.percentHigher}% higher than last week</strong> due to trip
+                          prep deadlines. LifeSync shifted {load.shiftedTasks} low-priority tasks to
+                          next week.
+                        </span>
+                      </p>
+                    </div>
+                  </section>
+
+                  {/* Proactive AI Insights */}
+                  <section className="card panel">
+                    <div className="panel__head">
+                      <div className="panel__title-group">
+                        <span className="panel__icon">
+                          <Icon name="sparkle" size={14} />
+                        </span>
+                        <div>
+                          <h3 className="panel__title">Proactive AI Insights</h3>
+                          <p className="panel__sub">Contextual cross-domain optimizations</p>
+                        </div>
+                      </div>
+                      <span className="chip chip--live">Live Feed</span>
+                    </div>
+
+                    <ul className="stack">
+                      {insights.map((it) => {
+                        const isBusy = busy[`insight:${it.id}`];
+                        const isDone = done[`insight:${it.id}`] || it.applied;
+                        const iconMap = {
+                          collision: "alert",
+                          subscription: "cloud",
+                          document: "passport",
+                        };
+                        return (
+                          <li className="insight" key={it.id}>
+                            <Icon
+                              name={iconMap[it.kind] || "sparkle"}
+                              size={16}
+                              className={`insight__icon ${
+                                it.kind === "collision" ? "insight__icon--danger" : ""
+                              }`}
+                            />
+                            <div className="insight__body">
+                              <h4 className="insight__title">{it.title}</h4>
+                              <p className="insight__text">
+                                {it.body}
+                                {it.highlight && (
+                                  <strong className="accent">{it.highlight}</strong>
+                                )}
+                              </p>
+
+                              {it.cta.kind === "link" && (
+                                <div className="insight__foot">
+                                  <span className="insight__applied">
+                                    {isDone ? "Applied to Timeline" : "Ready to apply"}
+                                  </span>
+                                  <span className="sep">•</span>
+                                  <button
+                                    className="link-btn"
+                                    onClick={() =>
+                                      runAction(
+                                        `insight:${it.id}`,
+                                        () => backend.applyInsight(it.id),
+                                        true
+                                      )
+                                    }
+                                    disabled={isBusy}
+                                  >
+                                    {it.cta.label}
+                                  </button>
+                                </div>
+                              )}
+                              {it.cta.kind === "button" && (
+                                <div className="insight__foot">
+                                  <button
+                                    className="btn btn--xs btn--chip"
+                                    onClick={() =>
+                                      runAction(
+                                        `insight:${it.id}`,
+                                        () => backend.applyInsight(it.id),
+                                        true
+                                      )
+                                    }
+                                    disabled={isBusy || isDone}
+                                  >
+                                    {isDone ? "Audit started" : isBusy ? "Starting…" : it.cta.label}
+                                    <Icon name="arrow" size={10} />
+                                  </button>
+                                </div>
+                              )}
+                              {it.cta.kind === "external" && (
+                                <div className="insight__foot">
+                                  <button
+                                    className="link-btn link-btn--indigo"
+                                    onClick={() =>
+                                      runAction(
+                                        `insight:${it.id}`,
+                                        () => backend.applyInsight(it.id),
+                                        true
+                                      )
+                                    }
+                                    disabled={isBusy}
+                                  >
+                                    {it.cta.label}
+                                    <Icon name="external" size={11} />
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </section>
+                </div>
+              </div>
+            </main>
+          </div>
+
+          {/* Modal: Ask LifeSync AI */}
+          {aiModalOpen && (
+            <div className="modal-overlay" onClick={() => setAiModalOpen(false)}>
+              <div className="modal" onClick={(e) => e.stopPropagation()}>
+                <div className="modal__head">
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <Icon name="sparkle" size={18} style={{ color: "var(--violet)" }} />
+                    <h3 className="modal__title">Ask LifeSync AI</h3>
+                  </div>
+                  <button className="icon-btn icon-btn--sm" onClick={() => setAiModalOpen(false)}>
+                    <Icon name="close" size={16} />
+                  </button>
+                </div>
+                <div className="modal__body">
+                  <p style={{ color: "var(--text-secondary)", fontSize: 13 }}>
+                    Ask anything about your connected obligations, cross-app schedules, or automated payments:
+                  </p>
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                    {[
+                      "Why renew insurance on Oct 11?",
+                      "Summarize my obligations for this week",
+                      "How can I save on cloud subscriptions?",
+                    ].map((s, idx) => (
+                      <button
+                        key={idx}
+                        className="btn btn--xs btn--chip"
+                        onClick={() => {
+                          setAiPrompt(s);
+                          handleAskAI(s);
+                        }}
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <input
+                      type="text"
+                      className="input-field"
+                      placeholder="e.g. Can I postpone my vehicle service?"
+                      value={aiPrompt}
+                      onChange={(e) => setAiPrompt(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && handleAskAI()}
+                    />
+                    <button className="btn btn--blue" onClick={() => handleAskAI()} disabled={aiBusy}>
+                      {aiBusy ? "Thinking…" : "Ask"}
+                    </button>
+                  </div>
+                  {aiResponse && (
+                    <div
+                      style={{
+                        padding: 14,
+                        borderRadius: "var(--r-sm)",
+                        background: "var(--bg-item)",
+                        borderLeft: "3px solid var(--violet)",
+                        lineHeight: "22px",
+                      }}
+                    >
+                      <p style={{ fontWeight: 600, color: "var(--violet)", marginBottom: 4 }}>
+                        LifeSync Neural Summary:
+                      </p>
+                      <p style={{ color: "var(--text-primary)" }}>{aiResponse}</p>
+                    </div>
+                  )}
+                </div>
+                <div className="modal__foot">
+                  <button className="btn btn--chip" onClick={() => setAiModalOpen(false)}>
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Modal: Quick Add */}
+          {quickAddOpen && (
+            <div className="modal-overlay" onClick={() => setQuickAddOpen(false)}>
+              <div className="modal" onClick={(e) => e.stopPropagation()}>
+                <div className="modal__head">
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <Icon name="plus" size={16} style={{ color: "var(--blue)" }} />
+                    <h3 className="modal__title">Quick Add Obligation</h3>
+                  </div>
+                  <button className="icon-btn icon-btn--sm" onClick={() => setQuickAddOpen(false)}>
+                    <Icon name="close" size={16} />
+                  </button>
+                </div>
+                <form onSubmit={handleQuickAddSubmit}>
+                  <div className="modal__body">
+                    <div>
+                      <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>
+                        OBLIGATION / TASK TITLE
+                      </label>
+                      <input
+                        type="text"
+                        className="input-field"
+                        placeholder="e.g. Broadband Fiber Bill"
+                        required
+                        value={qaTitle}
+                        onChange={(e) => setQaTitle(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6 }}>
+                        AMOUNT (OPTIONAL)
+                      </label>
+                      <input
+                        type="text"
+                        className="input-field"
+                        placeholder="e.g. 1,499"
+                        value={qaAmount}
+                        onChange={(e) => setQaAmount(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div className="modal__foot">
+                    <button type="button" className="btn btn--text" onClick={() => setQuickAddOpen(false)}>
+                      Cancel
+                    </button>
+                    <button type="submit" className="btn btn--blue">
+                      Add to Queue
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {/* Modal: Relationship Graph Inspector */}
+          {graphModalOpen && (
+            <div className="modal-overlay" onClick={() => setGraphModalOpen(false)}>
+              <div className="modal" onClick={(e) => e.stopPropagation()}>
+                <div className="modal__head">
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <Icon name="graph" size={16} style={{ color: "var(--blue-soft)" }} />
+                    <h3 className="modal__title">Relationship Graph Inspector</h3>
+                  </div>
+                  <button className="icon-btn icon-btn--sm" onClick={() => setGraphModalOpen(false)}>
+                    <Icon name="close" size={16} />
+                  </button>
+                </div>
+                <div className="modal__body">
+                  <p style={{ color: "var(--text-secondary)", fontSize: 13 }}>
+                    Autonomous causal dependency chain resolved for <strong>Vehicle Insurance</strong>:
+                  </p>
+                  <div className="graph-node-container">
+                    <div className="graph-node graph-node--danger">
+                      <div>
+                        <strong>Gmail Notification</strong>
+                        <p style={{ fontSize: 12, color: "var(--text-muted)" }}>Policy expiry notice from HDFC ERGO detected on Oct 9</p>
+                      </div>
+                      <span className="chip chip--live">Input Node</span>
+                    </div>
+                    <div style={{ textAlign: "center", color: "var(--text-muted)", fontSize: 12 }}>↓ connects to</div>
+                    <div className="graph-node">
+                      <div>
+                        <strong>Vahan National Ledger</strong>
+                        <p style={{ fontSize: 12, color: "var(--text-muted)" }}>Hyundai Creta KA-01-MJ-4021 record verified</p>
+                      </div>
+                      <span className="chip chip--sync">Verified</span>
+                    </div>
+                    <div style={{ textAlign: "center", color: "var(--text-muted)", fontSize: 12 }}>↓ collides with</div>
+                    <div className="graph-node graph-node--violet">
+                      <div>
+                        <strong>Calendar Road Trip: Oct 17</strong>
+                        <p style={{ fontSize: 12, color: "var(--text-muted)" }}>Goa departure requires active zero-dep policy &amp; road assistance</p>
+                      </div>
+                      <span className="chip chip--engine">Constraint</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="modal__foot">
+                  <button className="btn btn--blue" onClick={() => setGraphModalOpen(false)}>
+                    Understood
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Toasts Notification Layer */}
+          <div className="toasts">
+            {toasts.map((t) => (
+              <div className={`toast toast--${t.tone}`} key={t.id}>
+                <Icon name={t.tone === "success" ? "check" : "alert"} size={16} />
+                <span>{t.message}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>
