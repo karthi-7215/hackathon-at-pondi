@@ -1,0 +1,3491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0f131c" />
+  <title>LifeSync AI — Personal Intelligence & Obligation OS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+  
+  <!-- React 18 & Babel Standalone -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <!-- Canvas Confetti for Celebration Effects -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+  <style>
+    /* ================= DESIGN SYSTEM TOKENS ================= */
+    :root {
+      --bg-app: #0f131c;
+      --bg-sidebar: #0a0e17;
+      --bg-card: #181b25;
+      --bg-card-hover: #1f2330;
+      --bg-item: #1c1f29;
+      --bg-item-soft: rgba(28, 31, 41, 0.6);
+      --bg-chip: #262a34;
+      --bg-chip-strong: #31353f;
+      --bg-reasoning: rgba(10, 14, 23, 0.85);
+      --bg-header: rgba(15, 19, 28, 0.88);
+
+      --text-primary: #dfe2ef;
+      --text-secondary: #c2c6d6;
+      --text-muted: #8c909f;
+
+      --blue: #4d8eff;
+      --blue-soft: #adc6ff;
+      --indigo: #c0c1ff;
+      --violet: #d0bcff;
+      --violet-glow: #a078ff;
+      --emerald: #50e3c2;
+      --emerald-bg: rgba(80, 227, 194, 0.15);
+      --amber: #ffb74d;
+      --danger: #93000a;
+      --danger-soft: #ffb4ab;
+      --danger-text: #ffdad6;
+      --danger-bg: rgba(147, 0, 10, 0.35);
+      --indigo-bg: rgba(49, 49, 192, 0.4);
+      --indigo-badge: #3131c0;
+      --indigo-badge-text: #b0b2ff;
+      --on-blue: #00285d;
+      --on-blue-soft: #002e6a;
+
+      --font-display: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+      --font-body: "Inter", system-ui, -apple-system, sans-serif;
+      --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+      --r-xs: 4px;
+      --r-sm: 8px;
+      --r-md: 12px;
+      --r-lg: 16px;
+      --r-xl: 22px;
+      --r-pill: 9999px;
+
+      --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.25);
+      --shadow-hero: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
+      --shadow-glow: 0 0 24px rgba(77, 142, 255, 0.25);
+
+      --sidebar-w: 280px;
+      --header-h: 64px;
+      --content-max: 1040px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body, #root { height: 100%; }
+    body {
+      margin: 0;
+      background: var(--bg-app);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: 14px;
+      line-height: 20px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    h1, h2, h3, h4, p { margin: 0; }
+    ul { list-style: none; margin: 0; padding: 0; }
+    button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+    a { color: inherit; text-decoration: none; }
+    svg { display: block; flex-shrink: 0; }
+    :focus-visible { outline: 2px solid var(--blue-soft); outline-offset: 2px; }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--bg-chip-strong); border-radius: var(--r-pill); }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+    /* Shell & Layout */
+    .shell { min-height: 100%; display: flex; flex-direction: column; }
+    .main { margin-left: var(--sidebar-w); min-width: 0; flex: 1; display: flex; flex-direction: column; }
+    .content {
+      position: relative;
+      max-width: var(--content-max);
+      margin: 0 auto;
+      width: 100%;
+      padding: 32px 24px 72px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    /* Ambient Glow Aura */
+    .aura { position: absolute; inset: 0 0 auto 0; height: 320px; overflow: hidden; pointer-events: none; }
+    .aura__a { position: absolute; border-radius: var(--r-pill); left: 20%; width: 45%; height: 380px; top: -96px; background: rgba(77, 142, 255, 0.12); filter: blur(60px); }
+    .aura__b { position: absolute; border-radius: var(--r-pill); left: 10%; width: 55%; height: 320px; top: -112px; background: rgba(160, 120, 255, 0.15); filter: blur(70px); }
+
+    /* Sidebar */
+    .sidebar {
+      position: fixed; inset: 0 auto 0 0;
+      width: var(--sidebar-w);
+      background: var(--bg-sidebar);
+      display: flex; flex-direction: column;
+      z-index: 40;
+      border-right: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .sidebar__brand { height: var(--header-h); padding: 0 16px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; border-bottom: 1px solid rgba(255, 255, 255, 0.03); }
+    .brand { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+    .brand__logo {
+      width: 34px; height: 34px; border-radius: var(--r-sm);
+      display: grid; place-items: center;
+      color: var(--blue-soft);
+      background: linear-gradient(140deg, rgba(77,142,255,.3), rgba(160,120,255,.3));
+      box-shadow: inset 0 0 0 1px rgba(173,198,255,.3);
+    }
+    .brand__name { font: 700 16px/24px var(--font-display); letter-spacing: -0.4px; }
+    .sidebar__nav { flex: 1; overflow-y: auto; padding: 12px 8px; display: flex; flex-direction: column; gap: 14px; }
+    .nav-section { display: flex; flex-direction: column; gap: 3px; }
+    .nav-section__label { padding: 4px 10px 6px; font: 600 11px/14px var(--font-body); letter-spacing: .6px; text-transform: uppercase; color: var(--text-muted); }
+    .nav-link {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      padding: 8px 12px; min-height: 36px; border-radius: var(--r-sm);
+      font: 500 13px/18px var(--font-body); color: var(--text-secondary);
+      transition: all .15s ease;
+    }
+    .nav-link:hover { background: var(--bg-item); color: var(--text-primary); }
+    .nav-link__main { display: flex; align-items: center; gap: 10px; }
+    .nav-link--active, .nav-link--active:hover { background: var(--blue); color: var(--on-blue); font-weight: 600; box-shadow: 0 4px 12px rgba(77,142,255,0.3); }
+    .nav-badge { padding: 2px 7px; border-radius: var(--r-pill); font: 700 10px/12px var(--font-mono); }
+    .nav-badge--indigo { background: var(--indigo-badge); color: var(--indigo-badge-text); }
+    .nav-badge--neutral { background: var(--bg-chip); color: var(--blue-soft); }
+    .nav-badge--danger { background: var(--danger); color: var(--danger-text); }
+    .nav-badge--emerald { background: var(--emerald-bg); color: var(--emerald); }
+
+    .sidebar__footer { padding: 12px; display: flex; flex-direction: column; gap: 8px; background: var(--bg-sidebar); border-top: 1px solid rgba(255,255,255,0.04); }
+    .status-card { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: var(--r-sm); background: var(--bg-item); border: 1px solid rgba(255,255,255,0.04); }
+    .status-card__text { min-width: 0; }
+    .status-card__title { font: 600 12px/16px var(--font-body); color: var(--text-primary); }
+    .status-card__sub { font: 400 11px/15px var(--font-body); color: var(--text-muted); }
+    .profile { display: flex; align-items: center; justify-content: space-between; padding: 4px 6px 0; }
+    .profile__who { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+    .profile__name { font: 600 13px/18px var(--font-body); }
+    .profile__email { font: 400 11px/14px var(--font-body); color: var(--text-muted); }
+    .scrim { display: none; }
+
+    /* Header */
+    .header {
+      position: sticky; top: 0; z-index: 30;
+      height: var(--header-h);
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      padding: 0 28px;
+      background: var(--bg-header);
+      -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+      box-shadow: 0 1px 10px rgba(0, 0, 0, 0.25);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+    .header__menu { display: none; }
+    .search { position: relative; flex: 1; min-width: 0; max-width: 480px; }
+    .search__icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; }
+    .search__input {
+      width: 100%; height: 40px; padding: 0 56px 0 38px;
+      background: var(--bg-card); color: var(--text-primary);
+      border: 1px solid rgba(255, 255, 255, 0.08); border-radius: var(--r-sm);
+      font: 400 13px/normal var(--font-body);
+      transition: all .15s ease;
+    }
+    .search__input:focus { outline: none; border-color: rgba(173,198,255,.6); box-shadow: 0 0 0 3px rgba(77, 142, 255, 0.25); }
+    .search__kbd {
+      position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+      padding: 3px 6px; border-radius: var(--r-xs); background: var(--bg-chip);
+      font: 600 10px/12px var(--font-mono); color: var(--text-secondary);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    .search-dropdown {
+      position: absolute; top: calc(100% + 8px); left: 0; right: 0;
+      background: var(--bg-card); border-radius: var(--r-md);
+      box-shadow: 0 16px 36px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1);
+      max-height: 360px; overflow-y: auto; z-index: 60; padding: 6px;
+    }
+    .search-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 14px; border-radius: var(--r-sm); cursor: pointer;
+      transition: background .15s;
+    }
+    .search-item:hover { background: var(--bg-item); }
+    .search-item__title { font-weight: 500; font-size: 13px; color: var(--text-primary); }
+    .search-item__type { font-size: 11px; font-weight: 600; color: var(--blue-soft); background: var(--bg-chip); padding: 2px 8px; border-radius: var(--r-pill); }
+
+    .header__actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+    .header__divider { width: 1px; height: 28px; background: var(--bg-chip-strong); margin: 0 4px; }
+    .header__bell { position: relative; }
+    .header__bell-dot { position: absolute; top: 8px; right: 8px; width: 8px; height: 8px; border-radius: var(--r-pill); background: var(--blue-soft); box-shadow: 0 0 6px var(--blue-soft); }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      height: 38px; padding: 0 16px; border-radius: var(--r-sm);
+      font: 600 12px/16px var(--font-body); letter-spacing: .2px; white-space: nowrap;
+      transition: all .15s ease;
+    }
+    .btn:hover:not(:disabled) { filter: brightness(1.12); transform: translateY(-1px); }
+    .btn:active:not(:disabled) { transform: translateY(1px); filter: brightness(0.95); }
+    .btn:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+    .btn--sm { height: 32px; padding: 0 12px; font-size: 12px; }
+    .btn--xs { height: auto; padding: 4px 8px; font-size: 11px; font-weight: 600; border-radius: var(--r-xs); }
+    .btn--lg { height: 46px; border-radius: var(--r-md); font-size: 14px; letter-spacing: .1px; font-weight: 700; }
+    .btn--blue { background: var(--blue); color: var(--on-blue); box-shadow: 0 2px 10px rgba(77, 142, 255, 0.3); }
+    .btn--soft-blue { background: var(--blue-soft); color: var(--on-blue-soft); font-weight: 700; padding: 0 22px; box-shadow: 0 4px 14px rgba(77, 142, 255, 0.35); }
+    .btn--emerald { background: var(--emerald); color: #00382b; font-weight: 700; box-shadow: 0 4px 14px rgba(80, 227, 194, 0.35); }
+    .btn--chip { background: var(--bg-chip-strong); color: var(--text-primary); border: 1px solid rgba(255,255,255,0.06); }
+    .btn--lg.btn--chip { background: var(--bg-chip); }
+    .btn--ghost-violet { background: rgba(208, 188, 255, 0.08); color: var(--violet); border: 1px solid rgba(208, 188, 255, 0.25); box-shadow: 0 0 12px rgba(160, 120, 255, 0.15); }
+    .btn--text { height: 36px; padding: 0 10px; color: var(--text-secondary); }
+    .btn--text:hover:not(:disabled) { background: var(--bg-chip); color: var(--text-primary); filter: none; }
+    .btn--danger-ghost { color: var(--danger-soft); border: 1px solid rgba(255, 180, 171, 0.2); }
+    .btn--danger-ghost:hover:not(:disabled) { background: var(--danger-bg); }
+
+    .icon-btn { display: inline-grid; place-items: center; width: 38px; height: 38px; border-radius: var(--r-sm); color: var(--text-secondary); transition: all .15s; }
+    .icon-btn:hover { background: var(--bg-chip); color: var(--text-primary); }
+    .icon-btn--sm { width: 30px; height: 30px; }
+
+    .link-btn { display: inline-flex; align-items: center; gap: 4px; font: 600 11px/14px var(--font-body); letter-spacing: .4px; color: var(--text-muted); text-decoration: underline; }
+    .link-btn:hover:not(:disabled) { color: var(--text-primary); }
+    .link-btn--indigo { color: var(--indigo); text-decoration: none; }
+    .link-btn--indigo:hover:not(:disabled) { color: var(--text-primary); }
+
+    /* Chips, Badges & Utilities */
+    .chip { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: var(--r-pill); background: var(--bg-chip); font: 600 11px/14px var(--font-body); letter-spacing: .4px; color: var(--text-secondary); }
+    .chip--blue-text { border-radius: var(--r-xs); padding: 2px 6px; color: var(--blue-soft); font-family: var(--font-mono); font-size: 10px; font-weight: 700; }
+    .chip--sync { background: var(--bg-card); padding: 6px 12px; border: 1px solid rgba(255,255,255,0.05); cursor: pointer; transition: background .15s; }
+    .chip--sync:hover { background: var(--bg-chip); }
+    .chip--engine { padding: 6px 12px; color: var(--violet); background: rgba(208, 188, 255, 0.08); border: 1px solid rgba(208, 188, 255, 0.2); box-shadow: var(--shadow-card); }
+    .chip--count { color: var(--text-secondary); font-weight: 700; font-family: var(--font-mono); }
+    .chip--live { border-radius: var(--r-xs); padding: 3px 8px; background: rgba(208,188,255,.12); color: var(--violet); font-weight: 700; }
+    .chip--urgent { padding: 4px 10px; background: var(--danger); color: var(--danger-text); letter-spacing: 0.8px; text-transform: uppercase; font-weight: 700; }
+    .chip--confidence { padding: 4px 10px; color: var(--violet); background: rgba(208, 188, 255, 0.08); font-weight: 600; }
+
+    .dot { width: 8px; height: 8px; border-radius: var(--r-pill); background: var(--text-muted); flex-shrink: 0; }
+    .dot--violet { background: var(--violet); }
+    .dot--blue { background: var(--blue-soft); }
+    .dot--indigo { background: var(--indigo); }
+    .dot--emerald { background: var(--emerald); box-shadow: 0 0 6px var(--emerald); }
+    .dot--danger { background: var(--danger-soft); }
+    .dot--pink { width: 6px; height: 6px; background: var(--danger-text); }
+
+    .sep { color: var(--text-muted); }
+    .mono { font: 700 13px/20px var(--font-mono); color: var(--blue-soft); }
+    .accent { color: var(--blue-soft); }
+    .eyebrow { font: 600 11px/14px var(--font-body); letter-spacing: .6px; text-transform: uppercase; color: var(--text-muted); }
+    .eyebrow--icon { display: flex; align-items: center; gap: 5px; }
+    .avatar { display: inline-grid; place-items: center; border-radius: var(--r-pill); overflow: hidden; background: linear-gradient(140deg, #4d8eff, #a078ff); font: 700 12px/1 var(--font-body); color: #fff; flex-shrink: 0; }
+
+    /* Cards */
+    .card { background: var(--bg-card); border-radius: var(--r-lg); box-shadow: var(--shadow-card); border: 1px solid rgba(255, 255, 255, 0.04); }
+
+    /* Greeting Section */
+    .greeting { position: relative; display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; padding-bottom: 8px; }
+    .greeting__copy { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; max-width: 640px; }
+    .greeting__title { font: 800 38px/46px var(--font-display); letter-spacing: -1px; }
+    .greeting__lead { font: 600 17px/24px var(--font-display); letter-spacing: -.2px; color: var(--text-secondary); }
+    .greeting__lead strong { font-weight: 700; color: var(--blue-soft); }
+    .metrics { display: flex; gap: 12px; flex-shrink: 0; }
+    .metric { display: flex; align-items: center; gap: 12px; padding: 10px 18px; background: var(--bg-card); border-radius: var(--r-md); border: 1px solid rgba(255,255,255,0.04); }
+    .metric__icon { display: grid; place-items: center; width: 36px; height: 36px; border-radius: var(--r-sm); background: var(--bg-chip); color: var(--blue-soft); }
+    .metric__label { font: 600 11px/14px var(--font-body); letter-spacing: .6px; text-transform: uppercase; color: var(--text-muted); }
+    .metric__value { font: 700 16px/24px var(--font-display); }
+    .metric__delta { font-size: 12px; color: var(--danger-soft); font-family: var(--font-mono); }
+
+    /* Hero Priority Card */
+    .hero { position: relative; overflow: hidden; box-shadow: var(--shadow-hero); border: 1px solid rgba(255,255,255,0.06); }
+    .hero__glow { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(160,120,255,.14), rgba(77,142,255,.08) 50%, rgba(77,142,255,0)); pointer-events: none; }
+    .hero__edge { position: absolute; inset: 0 auto 0 0; width: 6px; background: linear-gradient(180deg, var(--violet), var(--blue) 50%, var(--indigo)); }
+    .hero__body { position: relative; padding: 32px; display: flex; flex-direction: column; gap: 20px; }
+    .hero__meta { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    .hero__badges { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .hero__detected { display: inline-flex; align-items: center; gap: 5px; font: 500 12px/16px var(--font-body); color: var(--text-muted); }
+    .hero__head { display: grid; grid-template-columns: minmax(0, 8fr) minmax(0, 4fr); gap: 24px; }
+    .hero__titles { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+    .hero__title { font: 800 28px/36px var(--font-display); letter-spacing: -.6px; }
+    .hero__sub { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font: 400 14px/22px var(--font-body); }
+    .tag { padding: 2px 8px; border-radius: var(--r-xs); background: var(--bg-item); font-weight: 600; }
+    .hero__expiry { display: flex; align-items: center; gap: 6px; font: 600 14px/22px var(--font-body); color: var(--danger-soft); }
+    .hero__price { display: flex; flex-direction: column; align-items: flex-end; text-align: right; }
+    .hero__amount { font: 800 40px/48px var(--font-display); letter-spacing: -1px; color: #ffffff; }
+    .hero__recommend { display: flex; align-items: center; gap: 4px; padding-top: 4px; font: 600 12px/16px var(--font-body); color: var(--blue-soft); }
+
+    .reasoning { display: flex; flex-direction: column; gap: 12px; padding: 20px 18px; border-radius: var(--r-md); background: var(--bg-reasoning); border: 1px solid rgba(255,255,255,0.04); }
+    .reasoning__flow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .reasoning__step { display: inline-flex; align-items: center; gap: 8px; }
+    .reasoning__arrow { color: var(--text-muted); }
+    .flow-tag { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: var(--r-sm); background: var(--bg-chip); font: 500 12px/16px var(--font-body); }
+    .flow-tag__src { color: var(--text-muted); font-weight: 600; }
+    .flow-tag__detail { font-weight: 500; }
+    .reasoning__narrative { font: 400 14px/22px var(--font-body); color: var(--text-secondary); }
+    .reasoning__narrative strong { font-weight: 600; color: var(--text-primary); }
+    .reasoning__narrative strong.accent { color: var(--blue-soft); }
+
+    .hero__actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding-top: 8px; }
+    .hero__primary, .hero__secondary { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+    /* Workspace 2-Column */
+    .workspace { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 24px; align-items: start; }
+    .workspace__col { display: flex; flex-direction: column; gap: 24px; min-width: 0; }
+    .workspace__col--main { grid-column: 1 / span 7; }
+    .workspace__col--side { grid-column: 8 / span 5; }
+
+    .panel { padding: 24px; display: flex; flex-direction: column; gap: 18px; }
+    .panel__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .panel__title-group { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .panel__icon { display: grid; place-items: center; width: 34px; height: 34px; border-radius: var(--r-sm); background: var(--bg-chip); color: var(--blue-soft); flex-shrink: 0; }
+    .panel__title { font: 700 18px/24px var(--font-display); letter-spacing: -.2px; }
+    .panel__sub { font: 400 12px/18px var(--font-body); color: var(--text-muted); }
+    .panel__range { font: 600 11px/14px var(--font-mono); color: var(--text-muted); white-space: nowrap; }
+
+    .stack { display: flex; flex-direction: column; gap: 10px; }
+    .stack--tight { gap: 8px; }
+    .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; border-radius: var(--r-md); background: var(--bg-item); border: 1px solid rgba(255,255,255,0.03); transition: all .15s ease; }
+    .row:hover { background: var(--bg-card-hover); border-color: rgba(255,255,255,0.08); }
+    .row--soft { padding: 10px 14px; background: var(--bg-item-soft); }
+    .row__main { display: flex; align-items: flex-start; gap: 12px; min-width: 0; flex: 1; }
+    .row__main--center { align-items: center; }
+    .row__icon { display: grid; place-items: center; width: 38px; height: 38px; border-radius: var(--r-md); background: var(--bg-chip-strong); color: var(--blue-soft); flex-shrink: 0; }
+    .row__text { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+    .row__title-line { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+    .row__title { font: 600 14px/20px var(--font-display); }
+    .row__meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font: 400 12px/18px var(--font-body); color: var(--text-muted); }
+    .row__meta strong { font-weight: 700; color: var(--text-primary); font-family: var(--font-mono); }
+    .row__meta--danger { color: var(--danger-soft); }
+    .row__meta--soft { color: var(--text-secondary); gap: 6px; }
+
+    .badge { padding: 2px 7px; border-radius: var(--r-xs); font: 700 11px/14px var(--font-body); white-space: nowrap; }
+    .badge--danger { background: var(--danger-bg); color: var(--danger-soft); }
+    .badge--indigo { background: var(--indigo-bg); color: var(--indigo); }
+    .badge--neutral { background: var(--bg-chip-strong); color: var(--text-primary); }
+    .badge--emerald { background: var(--emerald-bg); color: var(--emerald); }
+    .badge--blue { background: rgba(77, 142, 255, 0.2); color: var(--blue-soft); }
+
+    .date-tile { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 48px; height: 44px; border-radius: var(--r-sm); background: var(--bg-chip); flex-shrink: 0; border: 1px solid rgba(255,255,255,0.04); }
+    .date-tile__month { font: 700 10px/12px var(--font-mono); text-transform: uppercase; color: var(--text-muted); }
+    .date-tile__day { font: 700 15px/16px var(--font-display); color: var(--text-primary); }
+    .status { padding: 4px 8px; border-radius: var(--r-xs); background: var(--bg-chip); font: 600 11px/14px var(--font-body); white-space: nowrap; }
+    .status--neutral { color: var(--text-primary); }
+    .status--indigo { color: var(--indigo); background: var(--indigo-bg); }
+    .status--emerald { color: var(--emerald); background: var(--emerald-bg); }
+    .status--muted { color: var(--text-muted); }
+
+    /* Load Chart */
+    .chart { display: flex; flex-direction: column; gap: 16px; padding: 18px; border-radius: var(--r-md); background: var(--bg-item); border: 1px solid rgba(255,255,255,0.03); }
+    .chart__bars { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)) minmax(0, 1.4fr); gap: 10px; align-items: end; height: 144px; padding-top: 24px; }
+    .bar { display: flex; flex-direction: column; align-items: center; gap: 8px; justify-content: flex-end; cursor: pointer; }
+    .bar__value { font: 700 11px/14px var(--font-mono); color: var(--text-muted); opacity: 0; transition: opacity .15s; }
+    .bar:hover .bar__value, .bar--spike .bar__value, .bar--protected .bar__value { opacity: 1; }
+    .bar__col { width: 100%; display: grid; place-items: center; border-radius: 6px 6px 0 0; transition: transform .15s, filter .15s; min-height: 8px; }
+    .bar:hover .bar__col { transform: scaleY(1.06); filter: brightness(1.2); }
+    .bar__label { font: 600 11px/14px var(--font-mono); color: var(--text-muted); white-space: nowrap; }
+    .bar--blue .bar__col { background: var(--blue-soft); }
+    .bar--indigo .bar__col { background: var(--indigo); }
+    .bar--danger .bar__col { background: var(--danger-soft); }
+    .bar--danger .bar__value, .bar--danger .bar__label { color: var(--danger-soft); }
+    .bar--protected .bar__col { background: var(--bg-chip-strong); color: var(--violet); }
+    .bar--protected .bar__value, .bar--protected .bar__label { color: var(--violet); }
+    .chart__note { display: flex; gap: 8px; font: 400 12px/18px var(--font-body); color: var(--text-secondary); }
+    .chart__note svg { margin-top: 3px; color: var(--violet); }
+    .chart__note strong { font-weight: 600; color: var(--text-primary); }
+
+    /* Insights */
+    .insight { display: flex; gap: 12px; align-items: flex-start; padding: 16px; border-radius: var(--r-md); background: var(--bg-item); border: 1px solid rgba(255,255,255,0.03); transition: all .15s; }
+    .insight:hover { background: var(--bg-card-hover); }
+    .insight__icon { margin-top: 2px; color: var(--violet); flex-shrink: 0; }
+    .insight__icon--danger { color: var(--danger-soft); }
+    .insight__body { display: flex; flex-direction: column; gap: 4px; min-width: 0; flex: 1; }
+    .insight__title { font: 600 14px/20px var(--font-display); }
+    .insight__text { font: 400 12px/18px var(--font-body); color: var(--text-secondary); }
+    .insight__foot { display: flex; align-items: center; gap: 8px; padding-top: 6px; }
+    .insight__applied { font: 600 11px/14px var(--font-body); color: var(--emerald); }
+
+    /* Modals & Dialogs */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 80;
+      background: rgba(5, 7, 12, 0.84);
+      -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+      display: grid; place-items: center; padding: 20px;
+      animation: modal-fade .18s ease-out;
+    }
+    .modal {
+      background: var(--bg-card); border-radius: var(--r-lg);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 28px 70px rgba(0, 0, 0, 0.75);
+      width: 100%; max-width: 640px; max-height: 90vh;
+      overflow-y: auto; display: flex; flex-direction: column;
+      animation: modal-scale .2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .modal--lg { max-width: 820px; }
+    .modal__head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 24px; border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .modal__title { font: 700 18px/24px var(--font-display); display: flex; align-items: center; gap: 8px; }
+    .modal__body { padding: 24px; display: flex; flex-direction: column; gap: 18px; }
+    .modal__foot {
+      padding: 16px 24px; background: rgba(0,0,0,0.2);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex; justify-content: flex-end; gap: 10px;
+    }
+    @keyframes modal-fade { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes modal-scale { from { transform: scale(0.95) translateY(10px); } to { transform: scale(1) translateY(0); } }
+
+    /* Celebration Objective Completed Modal */
+    .celebration-modal {
+      text-align: center; padding: 32px 24px; display: flex; flex-direction: column; align-items: center; gap: 16px;
+    }
+    .celebration-badge {
+      width: 76px; height: 76px; border-radius: var(--r-pill);
+      display: grid; place-items: center;
+      background: linear-gradient(135deg, rgba(80, 227, 194, 0.2), rgba(77, 142, 255, 0.3));
+      box-shadow: 0 0 32px rgba(80, 227, 194, 0.4), inset 0 0 0 2px var(--emerald);
+      color: var(--emerald); animation: pop-in .4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .celebration-title { font: 800 26px/32px var(--font-display); letter-spacing: -.5px; color: #ffffff; }
+    .celebration-sub { font: 500 14px/22px var(--font-body); color: var(--text-secondary); max-width: 440px; }
+    .celebration-stats {
+      display: flex; gap: 12px; justify-content: center; width: 100%; max-width: 440px; margin-top: 8px;
+    }
+    .celebration-stat {
+      flex: 1; padding: 12px; background: var(--bg-item); border-radius: var(--r-md); border: 1px solid rgba(255,255,255,0.06);
+    }
+    .celebration-stat__label { font: 600 11px/14px var(--font-body); color: var(--text-muted); text-transform: uppercase; }
+    .celebration-stat__val { font: 800 18px/24px var(--font-display); color: var(--emerald); font-family: var(--font-mono); }
+    @keyframes pop-in { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+    /* Inputs & Form Fields */
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-label { font: 600 11px/14px var(--font-body); letter-spacing: .5px; text-transform: uppercase; color: var(--text-muted); }
+    .input-field {
+      width: 100%; padding: 10px 14px; background: var(--bg-item);
+      border: 1px solid rgba(255, 255, 255, 0.08); border-radius: var(--r-sm);
+      color: var(--text-primary); font: 400 13px/18px var(--font-body);
+      transition: all .15s;
+    }
+    .input-field:focus { outline: none; border-color: var(--blue-soft); box-shadow: 0 0 0 2px rgba(77, 142, 255, 0.2); }
+    select.input-field { cursor: pointer; }
+    textarea.input-field { min-height: 80px; resize: vertical; }
+
+    /* Interactive Graph */
+    .graph-node-container { display: flex; flex-direction: column; gap: 12px; padding: 16px; background: var(--bg-sidebar); border-radius: var(--r-md); }
+    .graph-node { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--bg-item); border-radius: var(--r-sm); border-left: 4px solid var(--blue-soft); }
+    .graph-node--danger { border-left-color: var(--danger-soft); }
+    .graph-node--violet { border-left-color: var(--violet); }
+    .graph-node--emerald { border-left-color: var(--emerald); }
+    .graph-node--indigo { border-left-color: var(--indigo); }
+
+    /* Checklist Item in Planner */
+    .checklist-row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: var(--bg-item); border-radius: var(--r-sm); border: 1px solid rgba(255,255,255,0.03); cursor: pointer; transition: all .15s; }
+    .checklist-row:hover { background: var(--bg-card-hover); }
+    .checklist-row--done { opacity: 0.6; text-decoration: line-through; }
+    .checkbox-box {
+      width: 20px; height: 20px; border-radius: var(--r-xs); border: 2px solid var(--blue-soft);
+      display: grid; place-items: center; color: var(--on-blue); transition: all .15s;
+    }
+    .checkbox-box--checked { background: var(--emerald); border-color: var(--emerald); color: #00382b; }
+
+    /* Chat Messages Box */
+    .chat-container {
+      display: flex; flex-direction: column; gap: 12px;
+      max-height: 380px; min-height: 220px; overflow-y: auto; padding: 12px 6px;
+    }
+    .chat-bubble {
+      padding: 14px 16px; border-radius: var(--r-md); font-size: 13px; line-height: 22px;
+      animation: modal-fade .2s ease-out;
+    }
+    .chat-bubble--assistant {
+      background: var(--bg-item); border: 1px solid rgba(255,255,255,0.05); border-left: 3px solid var(--violet);
+    }
+    .chat-bubble--user {
+      background: rgba(77, 142, 255, 0.15); border: 1px solid rgba(77, 142, 255, 0.25); border-left: 3px solid var(--blue);
+      align-self: flex-end; width: 85%;
+    }
+    .chat-bubble__author { font-weight: 700; font-size: 12px; margin-bottom: 4px; }
+    .chat-bubble--assistant .chat-bubble__author { color: var(--violet); }
+    .chat-bubble--user .chat-bubble__author { color: var(--blue-soft); }
+
+    /* Toasts */
+    .toasts { position: fixed; right: 24px; bottom: 24px; z-index: 95; display: flex; flex-direction: column; gap: 8px; }
+    .toast {
+      display: flex; align-items: center; gap: 10px; padding: 12px 18px;
+      border-radius: var(--r-md); background: #222632;
+      font: 500 13px/18px var(--font-body); box-shadow: 0 12px 30px rgba(0,0,0,.6);
+      border: 1px solid rgba(255,255,255,0.08); animation: toast-in .2s ease-out;
+    }
+    .toast--success svg { color: var(--emerald); }
+    .toast--error svg { color: var(--danger-soft); }
+    .toast--info svg { color: var(--blue-soft); }
+    @keyframes toast-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+    /* Responsive */
+    @media (max-width: 1180px) {
+      .workspace { grid-template-columns: 1fr; }
+      .workspace__col--main, .workspace__col--side { grid-column: 1; }
+      .greeting { flex-direction: column; align-items: flex-start; }
+    }
+    @media (max-width: 960px) {
+      .main { margin-left: 0; }
+      .sidebar { transform: translateX(-100%); transition: transform .2s ease; }
+      .sidebar--open { transform: none; }
+      .scrim { display: block; position: fixed; inset: 0; z-index: 35; background: rgba(0,0,0,.65); opacity: 0; pointer-events: none; transition: opacity .2s; }
+      .scrim--on { opacity: 1; pointer-events: auto; }
+      .header__menu { display: inline-grid; }
+      .chip--sync { display: none; }
+    }
+    @media (max-width: 720px) {
+      .header { padding: 0 14px; gap: 8px; }
+      .header__actions .btn span, .header__divider { display: none; }
+      .search__kbd { display: none; }
+      .content { padding: 20px 14px 48px; }
+      .greeting__title { font-size: 28px; line-height: 34px; }
+      .hero__body { padding: 20px 16px; }
+      .hero__head { grid-template-columns: 1fr; gap: 16px; }
+      .hero__price { align-items: flex-start; text-align: left; }
+      .row { flex-direction: column; align-items: stretch; }
+      .row .btn { width: 100%; }
+      .row--soft { flex-direction: row; align-items: center; }
+      .hero__primary .btn, .hero__actions { width: 100%; }
+      .toasts { left: 16px; right: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <!-- React Application Logic -->
+  <script type="text/babel">
+    const { useState, useEffect, useRef, useCallback } = React;
+
+    // --- Audio Sound Chime Generator (Web Audio API) ---
+    function playCelebrationChime() {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        const now = ctx.currentTime;
+        
+        const notes = [523.25, 659.25, 783.99, 1046.50];
+        notes.forEach((freq, idx) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = "sine";
+          osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+          gain.gain.setValueAtTime(0.001, now + idx * 0.08);
+          gain.gain.exponentialRampToValueAtTime(0.25, now + idx * 0.08 + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.08 + 0.6);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now + idx * 0.08);
+          osc.stop(now + idx * 0.08 + 0.7);
+        });
+      } catch (e) {}
+    }
+
+    // --- Confetti Burst ---
+    function triggerConfetti() {
+      if (typeof confetti === "function") {
+        confetti({
+          particleCount: 90,
+          spread: 75,
+          origin: { y: 0.6 },
+          colors: ["#50e3c2", "#4d8eff", "#d0bcff", "#adc6ff", "#ffd166"],
+        });
+      }
+    }
+
+    // --- SVG Icon Library ---
+    const ICON_PATHS = {
+      home: ["M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"],
+      clock: ["o 12 12 9", "M12 7v5l3 2"],
+      sparkle: ["M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z", "M19 16v4 M17 18h4"],
+      inbox: ["M4 13l2-8h12l2 8v6H4z", "M4 13h5l1 2h4l1-2h5"],
+      graph: ["o 12 5 2", "o 5 18 2", "o 19 18 2", "M12 7v4 M12 11l-6 5 M12 11l6 5"],
+      refresh: ["M20 11a8 8 0 0 0-14-4L4 9 M4 4v5h5", "M4 13a8 8 0 0 0 14 4l2-2 M20 20v-5h-5"],
+      link: ["M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1", "M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"],
+      wallet: ["M3 7a2 2 0 0 1 2-2h13v4", "M3 7v11a2 2 0 0 0 2 2h15V9H5a2 2 0 0 1-2-2z", "M16 14h2"],
+      repeat: ["M17 2l4 4-4 4", "M3 11V9a3 3 0 0 1 3-3h15", "M7 22l-4-4 4-4", "M21 13v2a3 3 0 0 1-3 3H3"],
+      folder: ["M3 6a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"],
+      bell: ["M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9", "M10 21a2 2 0 0 0 4 0"],
+      chart: ["M4 20V10 M10 20V4 M16 20v-8 M22 20H2"],
+      settings: ["o 12 12 3", "M12 2v3 M12 19v3 M4.2 4.2l2.1 2.1 M17.7 17.7l2.1 2.1 M2 12h3 M19 12h3 M4.2 19.8l2.1-2.1 M17.7 6.3l2.1-2.1"],
+      logout: ["M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4", "M16 17l5-5-5-5 M21 12H9"],
+      search: ["o 11 11 7", "M20 20l-3.5-3.5"],
+      plus: ["M12 5v14 M5 12h14"],
+      bolt: ["M13 2 4 14h7l-1 8 9-12h-7z"],
+      mail: ["M3 6h18v12H3z", "M3 7l9 6 9-6"],
+      calendar: ["M4 6h16v14H4z", "M4 10h16 M8 3v4 M16 3v4"],
+      trend: ["M3 17l6-6 4 4 8-8", "M15 7h6v6"],
+      route: ["M3 11l18-8-8 18-2-8z"],
+      review: ["M3 5h18v12H8l-5 4z"],
+      shield: ["M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z", "M9 12l2 2 4-4"],
+      brain: ["M9 4a3 3 0 0 0-3 3 3 3 0 0 0-2 5 3 3 0 0 0 2 5 3 3 0 0 0 6 1V4a3 3 0 0 0-3 0z", "M15 4a3 3 0 0 1 3 3 3 3 0 0 1 2 5 3 3 0 0 1-2 5 3 3 0 0 1-3 1"],
+      lock: ["M6 11h12v10H6z", "M8 11V7a4 4 0 0 1 8 0v4"],
+      alert: ["M12 3l10 18H2z", "M12 10v5 M12 18v.5"],
+      arrow: ["M5 12h14 M13 6l6 6-6 6"],
+      external: ["M14 4h6v6 M20 4l-9 9", "M18 14v6H4V6h6"],
+      snooze: ["o 12 13 8", "M12 9v4l2 2 M4 4l3-2 M20 4l-3-2"],
+      delegate: ["M15 20v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2", "o 8.5 7 4", "M19 8v6 M22 11h-6"],
+      medical: ["M4 4h16v16H4z", "M12 8v8 M8 12h8"],
+      menu: ["M4 6h16 M4 12h16 M4 18h16"],
+      close: ["M6 6l12 12 M18 6L6 18"],
+      chartSearch: ["M4 20V10 M10 20V4 M16 20v-6", "o 18 15 3", "M20.5 17.5 22 19"],
+      neural: ["o 12 12 2", "M12 4v6 M12 14v6 M4 12h6 M14 12h6", "o 12 3 1", "o 12 21 1", "o 3 12 1", "o 21 12 1"],
+      check: ["M5 12l5 5L20 7"],
+      cloud: ["M7 18a4 4 0 0 1-.5-8A6 6 0 0 1 18 9a4.5 4.5 0 0 1-.5 9z"],
+      passport: ["M6 3h12v18H6z", "o 12 11 3", "M9 17h6"],
+      trash: ["M3 6h18 M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6 M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"],
+      download: ["M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M7 10l5 5 5-5 M12 15V3"],
+      upload: ["M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M17 8l-5-5-5 5 M12 3v12"],
+      trophy: ["M6 9V2h12v7a6 6 0 0 1-12 0z", "M6 4H3a2 2 0 0 0-2 2v1a4 4 0 0 0 4 4h1", "M18 4h3a2 2 0 0 1 2 2v1a4 4 0 0 1-4 4h-1", "M12 15v4 M8 22h8"],
+      checkCircle: ["o 12 12 9", "M8.5 12l2.5 2.5 5-5"],
+      play: ["M5 3l14 9-14 9V3z"],
+      key: ["M21 2l-2 2m-1.5 1.5L14 9l-3-3L3.5 13.5a5 5 0 1 0 7 7L18 13l2.5-2.5m0 0L22 9l-2-2m0 0l2-2-2-2-2 2"],
+    };
+
+    function Icon({ name, size = 16, strokeWidth = 1.75, className = "", style = {} }) {
+      const parts = ICON_PATHS[name] || ICON_PATHS.sparkle;
+      return (
+        <svg
+          width={size}
+          height={size}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={strokeWidth}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className={className}
+          style={style}
+        >
+          {parts.map((p, i) => {
+            if (p.startsWith("o ")) {
+              const [, cx, cy, r] = p.split(" ");
+              return <circle key={i} cx={cx} cy={cy} r={r} />;
+            }
+            return <path key={i} d={p} />;
+          })}
+        </svg>
+      );
+    }
+
+    const formatINR = (n) =>
+      new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(n);
+
+    // Initial Baseline Dataset
+    const defaultDatabase = {
+      user: {
+        name: "Arun V.",
+        shortName: "Arun",
+        email: "arun@lifesync.ai",
+        role: "Product Engineer",
+        currency: "INR",
+        geminiApiKey: "", // User can optionally store their own Gemini/OpenAI API key
+      },
+      sync: { appsSynced: 6, lastSyncedLabel: "Just now", sourcesCount: 6 },
+      metrics: {
+        cognitiveLoadPct: 68,
+        cognitiveLoadDeltaPct: 32,
+        automationHealthPct: 100,
+        criticalObligations: 3,
+        totalSavingsINR: 4850,
+      },
+      priority: {
+        id: "ob_insurance_001",
+        urgency: "high",
+        confidencePct: 98,
+        detectedLabel: "Detected 14m ago from Gmail & Vahan Ledger",
+        title: "Vehicle Insurance Renewal",
+        provider: "HDFC ERGO Comprehensive",
+        reference: "Hyundai Creta KA-01-MJ-4021",
+        expiryLabel: "Expires Oct 15, 2026 (6 days away)",
+        amount: 8420,
+        currency: "INR",
+        completed: false,
+        recommendation: "LifeSync Recommends: Renew by Oct 11",
+        reasoning: [
+          { id: "r1", source: "Gmail:", detail: "Policy Expiry Detected", tone: "danger" },
+          { id: "r2", source: "Calendar:", detail: "Goa Road Trip on Oct 17", tone: "indigo" },
+          { id: "r3", source: "Historical Pattern:", detail: "Endorsement takes 2–3 Days", tone: "violet" },
+          { id: "r4", source: "User Rule:", detail: "Avoid Weekend Processing", tone: "blue" },
+        ],
+        narrative: {
+          before: "Your road trip begins ",
+          date1: "October 17",
+          middle: ". Because digital policy endorsement takes 2–3 business days at HDFC ERGO, renewing on ",
+          date2: "Friday, October 11",
+          after: " guarantees active coverage and road hazard assistance before departure without encountering weekend banking freezes.",
+        },
+        primaryActionLabel: "Handle Now",
+      },
+      adminItems: [
+        {
+          id: "adm_bescom",
+          icon: "bolt",
+          title: "Electricity Bill (BESCOM Bangalore)",
+          badge: { label: "Due Tomorrow", tone: "danger" },
+          amount: 2340,
+          amountLabel: "₹2,340",
+          meta: "Discovered via Gmail PDF",
+          metaIcon: "mail",
+          action: { label: "Quick Pay", variant: "primary", icon: "bolt" },
+          completed: false,
+        },
+        {
+          id: "adm_doctor",
+          icon: "doctor",
+          title: "Dr. Sharma Consultation",
+          badge: { label: "Today @ 4:30 PM", tone: "indigo" },
+          meta: "Apollo Specialty Hospital, Indiranagar",
+          metaIcon: "calendar",
+          action: { label: "View Directions & Prep", variant: "secondary", icon: "route" },
+          completed: false,
+        },
+        {
+          id: "adm_figma",
+          icon: "sparkle",
+          title: "Figma Professional Plan",
+          badge: { label: "Renews Tomorrow", tone: "neutral" },
+          amount: 1299,
+          amountLabel: "₹1,299/mo",
+          meta: "Alert: Price increased by ₹200",
+          metaIcon: "trend",
+          metaTone: "danger",
+          action: { label: "Review", variant: "secondary", icon: "review" },
+          completed: false,
+        },
+      ],
+      upcomingRange: "Oct 12 – Oct 20",
+      upcoming: [
+        {
+          id: "up_service",
+          month: "Oct",
+          day: "14",
+          title: "Vehicle General Service Check",
+          subtitle: "Mandatory prep for Goa road trip • Advaith Hyundai",
+          status: { label: "Confirmed", tone: "neutral" },
+          completed: false,
+        },
+        {
+          id: "up_card",
+          month: "Oct",
+          day: "18",
+          title: "HDFC Regalia Credit Card Statement",
+          amount: 42850,
+          amountLabel: "₹42,850",
+          subtitle: "total balance • Auto-debit verified on HDFC Netbanking",
+          status: { label: "Auto-Pay Ready", tone: "indigo" },
+          completed: false,
+        },
+        {
+          id: "up_water",
+          month: "Oct",
+          day: "20",
+          title: "Water Utility Board (BWSSB)",
+          amount: 680,
+          amountLabel: "₹680",
+          subtitle: "Utility threshold within normal monthly consumption",
+          status: { label: "Queued", tone: "muted" },
+          completed: false,
+        },
+      ],
+      // Dynamic Customizable Timeline Events
+      timelineEvents: [
+        {
+          id: "tl_1",
+          title: "Pay Hyundai Creta Insurance (HDFC ERGO)",
+          date: "2026-10-11",
+          dateFormatted: "Oct 11, 2026 • Friday",
+          category: "Critical Action",
+          tone: "danger",
+          description: "Recommended renewal date before weekend freeze. Guarantees active policy before Goa trip.",
+          amount: 8420,
+          completed: false,
+          obligationId: "ob_insurance_001",
+        },
+        {
+          id: "tl_2",
+          title: "Vehicle 40-Point General Service Check",
+          date: "2026-10-14",
+          dateFormatted: "Oct 14, 2026 • Monday",
+          category: "Service",
+          tone: "neutral",
+          description: "Advaith Hyundai (10:00 AM). Mandatory brake, coolant, and tyre check.",
+          completed: false,
+          obligationId: "up_service",
+        },
+        {
+          id: "tl_3",
+          title: "Bangalore to Goa Road Trip Departure",
+          date: "2026-10-17",
+          dateFormatted: "Oct 17, 2026 • Saturday",
+          category: "Travel Event",
+          tone: "indigo",
+          description: "Departure via NH48 / Hubli route. FASTag auto-recharge and offline maps enabled.",
+          completed: false,
+        },
+        {
+          id: "tl_4",
+          title: "HDFC Regalia Statement Auto-Debit",
+          date: "2026-10-18",
+          dateFormatted: "Oct 18, 2026 • Sunday",
+          category: "Auto-Debit",
+          tone: "indigo",
+          description: "₹42,850 total balance verified on HDFC Netbanking with sufficient account funds.",
+          amount: 42850,
+          completed: false,
+          obligationId: "up_card",
+        },
+      ],
+      load: {
+        percentHigher: 32,
+        shiftedTasks: 2,
+        days: [
+          { id: "mon", label: "Mon", value: 3, heightPx: 56, tone: "blue" },
+          { id: "tue", label: "Tue", value: 5, heightPx: 80, tone: "indigo" },
+          { id: "wed", label: "Wed", value: 2, heightPx: 40, tone: "blue" },
+          { id: "thu", label: "Thu 15", value: 7, heightPx: 112, tone: "danger" },
+          { id: "fri", label: "Fri", value: 3, heightPx: 56, tone: "blue" },
+          { id: "wknd", label: "Sat/Sun", heightPx: 32, tone: "protected" },
+        ],
+      },
+      insights: [
+        {
+          id: "in_collision",
+          kind: "collision",
+          title: "Trip Travel Window Collision",
+          body: "Insurance renewal window directly collides with your road trip travel day. Pre-authorizing renewal on Oct 11 prevents policy gap while en route.",
+          cta: { label: "View Dependency", kind: "link" },
+          applied: false,
+        },
+        {
+          id: "in_subs",
+          kind: "subscription",
+          title: "Subscription Overlap Detected",
+          body: "2 cloud subscriptions (Google One 2TB & iCloud+ 2TB) possess overlapping storage quotas. Consolidating can save ",
+          highlight: "₹1,200/mo",
+          cta: { label: "Initiate Cloud Audit", kind: "button" },
+          applied: false,
+        },
+        {
+          id: "in_passport",
+          kind: "document",
+          title: "Passport Validity Threshold",
+          body: "Your Indian Passport expires in 6 months (June 2027). International travel restrictions apply to visas with <6 months validity.",
+          cta: { label: "Pre-fill Tatkaal Renewal Form", kind: "external" },
+          applied: false,
+        },
+      ],
+      checklists: [
+        {
+          id: "chk_goa",
+          title: "Goa Road Trip Readiness Checklist",
+          category: "Travel & Auto",
+          items: [
+            { id: "c1", label: "Renew Vehicle Zero-Dep Insurance Policy", done: false, obligationId: "ob_insurance_001" },
+            { id: "c2", label: "Vehicle 40-Point General Service (Advaith Hyundai)", done: false, obligationId: "up_service" },
+            { id: "c3", label: "FASTag Balance Recharge (Min ₹1,500)", done: true },
+            { id: "c4", label: "Download Offline Google Maps (Karnataka & Goa coast)", done: false },
+            { id: "c5", label: "Pack Car Tyre Inflator & First Aid Kit", done: false },
+          ]
+        },
+        {
+          id: "chk_monthly",
+          title: "October Financial & Utility Admin",
+          category: "Household",
+          items: [
+            { id: "m1", label: "Pay BESCOM Electricity Bill", done: false, obligationId: "adm_bescom" },
+            { id: "m2", label: "Verify HDFC Regalia Auto-Debit Setup", done: false, obligationId: "up_card" },
+            { id: "m3", label: "Audit Duplicate Cloud Storage Subscriptions", done: false, obligationId: "in_subs" },
+          ]
+        }
+      ],
+      inbox: [
+        { id: "ib_1", title: "HDFC Bank: e-Mandate Execution Alert (Netflix)", sender: "alerts@hdfcbank.com", time: "10 mins ago", category: "Receipts", read: false },
+        { id: "ib_2", title: "BESCOM: Bill Generated for Consumer #492019", sender: "billing@bescom.org", time: "1 hour ago", category: "Bills", read: false },
+        { id: "ib_3", title: "Apollo Hospitals: Appointment Confirmation Dr. Sharma", sender: "noreply@apollohospitals.com", time: "3 hours ago", category: "Appointments", read: true },
+        { id: "ib_4", title: "Figma: Subscription Price Adjustment Notice", sender: "support@figma.com", time: "Yesterday", category: "SaaS", read: true },
+        { id: "ib_5", title: "Vahan Portal: Vehicle Fitness & Tax Status Synchronized", sender: "parivahan@gov.in", time: "Oct 8", category: "Govt", read: true },
+        { id: "ib_6", title: "Tata Power EV: Charging session receipt ₹320", sender: "ezcharge@tatapower.com", time: "Oct 7", category: "Receipts", read: true },
+      ],
+      // Dynamic Customizable Automations
+      automations: [
+        { id: "aut_1", name: "Auto-Pay Utility Bills under ₹3,000", trigger: "When utility bill PDF is detected in Gmail < ₹3,000", action: "Execute UPI AutoPay 2 days before due date", category: "Bills & Payments", active: true, runs: 14 },
+        { id: "aut_2", name: "Road Trip Congestion & Conflict Shield", trigger: "When verified road trip calendar event is active", action: "Snooze non-critical SaaS reminders and queue auto-notifications", category: "Travel Shield", active: true, runs: 4 },
+        { id: "aut_3", name: "SaaS Price Hike Sentinel", trigger: "When SaaS receipt arrives with >10% price delta", action: "Flag with badge and notify user for review", category: "SaaS Monitor", active: true, runs: 9 },
+        { id: "aut_4", name: "Passport & Document Expiry Countdown", trigger: "When document expiry is within 180 days", action: "Generate Tatkaal form reminder & passport authority alert", category: "Identity", active: true, runs: 2 },
+      ],
+      connectedApps: [
+        { id: "app_gmail", name: "Google Workspace & Gmail", type: "Email & Calendar", status: "Connected", syncRate: "Every 5 mins", icon: "mail" },
+        { id: "app_hdfc", name: "HDFC Netbanking & Cards", type: "Financial Ledger", status: "Connected", syncRate: "Every 15 mins", icon: "wallet" },
+        { id: "app_vahan", name: "Vahan National Vehicle Portal", type: "Government Records", status: "Connected", syncRate: "Daily", icon: "shield" },
+        { id: "app_bescom", name: "BESCOM Utility Smart Meter", type: "Electricity", status: "Connected", syncRate: "Hourly", icon: "bolt" },
+        { id: "app_icloud", name: "Apple iCloud & Reminders", type: "Cloud Storage", status: "Connected", syncRate: "Realtime", icon: "cloud" },
+        { id: "app_figma", name: "Figma Workspace", type: "Subscriptions", status: "Connected", syncRate: "Daily", icon: "sparkle" },
+      ],
+      transactions: [
+        { id: "tx_1", title: "Vehicle Insurance Renewal (HDFC ERGO)", amount: 8420, date: "Pending", status: "Pending", category: "Automotive" },
+        { id: "tx_2", title: "BESCOM Electricity Bill", amount: 2340, date: "Pending", status: "Pending", category: "Utilities" },
+        { id: "tx_3", title: "Apollo Clinic Registration", amount: 900, date: "Oct 8, 2026", status: "Paid", category: "Healthcare" },
+        { id: "tx_4", title: "Google One 2TB Annual", amount: 6500, date: "Sep 28, 2026", status: "Paid", category: "Cloud" },
+        { id: "tx_5", title: "Swiggy Instamart Grocery", amount: 1420, date: "Oct 5, 2026", status: "Paid", category: "Food" },
+      ],
+      subscriptions: [
+        { id: "sub_1", name: "Google One 2TB", price: "₹6,500/yr", monthlyEq: 541, nextBilling: "Sep 28, 2027", tag: "Cloud Storage", overlap: true },
+        { id: "sub_2", name: "Apple iCloud+ 2TB", price: "₹749/mo", monthlyEq: 749, nextBilling: "Oct 24, 2026", tag: "Cloud Storage", overlap: true },
+        { id: "sub_3", name: "Figma Professional", price: "₹1,299/mo", monthlyEq: 1299, nextBilling: "Oct 10, 2026", tag: "Productivity", alert: "Price +₹200" },
+        { id: "sub_4", name: "Netflix Premium 4K", price: "₹649/mo", monthlyEq: 649, nextBilling: "Nov 02, 2026", tag: "Entertainment" },
+        { id: "sub_5", name: "GitHub Copilot Enterprise", price: "₹1,650/mo", monthlyEq: 1650, nextBilling: "Oct 19, 2026", tag: "Developer" },
+      ],
+      vaultDocuments: [
+        { id: "doc_1", name: "Indian Passport (Arun V.)", docNumber: "Z9401824", expiryDate: "June 14, 2027", daysLeft: 180, status: "Renew Soon", category: "Identity" },
+        { id: "doc_2", name: "Hyundai Creta Registration Certificate (RC)", docNumber: "KA-01-MJ-4021", expiryDate: "March 10, 2036", daysLeft: 3450, status: "Valid", category: "Vehicle" },
+        { id: "doc_3", name: "HDFC ERGO Comprehensive Policy", docNumber: "POL-8492019-2025", expiryDate: "Oct 15, 2026", daysLeft: 6, status: "Expiring", category: "Insurance" },
+        { id: "doc_4", name: "Karnataka Driving License", docNumber: "DL-04201400921", expiryDate: "Aug 20, 2038", daysLeft: 4320, status: "Valid", category: "Identity" },
+      ],
+      notifications: [
+        { id: "notif_1", title: "Urgent: Vehicle Insurance expires in 6 days", time: "14m ago", unread: true, linkTab: "dashboard" },
+        { id: "notif_2", title: "BESCOM Bill ₹2,340 is due tomorrow", time: "1h ago", unread: true, linkTab: "dashboard" },
+        { id: "notif_3", title: "Cloud Audit: ₹1,200/mo savings potential found", time: "2h ago", unread: true, linkTab: "subscriptions" },
+      ]
+    };
+
+    // Device Database Storage Manager
+    const DB_STORAGE_KEY = "LIFESYNC_AI_DEVICE_DB_V3";
+
+    const DeviceDatabase = {
+      async load() {
+        try {
+          const serverRes = await fetch("/api/dashboard");
+          if (serverRes.ok) {
+            const data = await serverRes.json();
+            if (data && data.user) {
+              localStorage.setItem(DB_STORAGE_KEY, JSON.stringify(data));
+              return data;
+            }
+          }
+        } catch (e) {}
+
+        try {
+          const stored = localStorage.getItem(DB_STORAGE_KEY);
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            if (!parsed.timelineEvents) parsed.timelineEvents = defaultDatabase.timelineEvents;
+            if (!parsed.automations) parsed.automations = defaultDatabase.automations;
+            return parsed;
+          }
+        } catch (e) {
+          console.error("Device database read error, fallback to defaults", e);
+        }
+
+        localStorage.setItem(DB_STORAGE_KEY, JSON.stringify(defaultDatabase));
+        return JSON.parse(JSON.stringify(defaultDatabase));
+      },
+
+      async save(data) {
+        try {
+          localStorage.setItem(DB_STORAGE_KEY, JSON.stringify(data));
+          fetch("/api/sync", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+          }).catch(() => {});
+        } catch (e) {
+          console.error("Device database write error", e);
+        }
+      },
+
+      reset() {
+        localStorage.removeItem(DB_STORAGE_KEY);
+        return JSON.parse(JSON.stringify(defaultDatabase));
+      }
+    };
+
+    // Real AI Service: Interacts with Live Neural LLM Engine & Context Injection
+    async function queryLiveAI(prompt, conversationHistory, dbContext) {
+      // Build a comprehensive system prompt summarizing user's real live database
+      const liveContextSummary = [
+        "USER CONTEXT:",
+        `Name: ${dbContext.user.name} (${dbContext.user.email})`,
+        `Cognitive Load: ${dbContext.metrics.cognitiveLoadPct}% (Strain: ${dbContext.metrics.cognitiveLoadDeltaPct}% higher)`,
+        `Critical Obligations Count: ${dbContext.metrics.criticalObligations}`,
+        `Priority Obligation: ${dbContext.priority.title} (${dbContext.priority.provider}) - Amount: ₹${dbContext.priority.amount} - Expiry: ${dbContext.priority.expiryLabel} - Status: ${dbContext.priority.completed ? "Paid & Endorsed" : "Pending"}`,
+        `Admin Tasks: ${dbContext.adminItems.map(i => i.title + " (" + (i.completed ? "Done" : "Pending") + ")").join(", ")}`,
+        `Upcoming Timeline Events: ${dbContext.timelineEvents.map(t => t.title + " on " + t.date + " (" + (t.completed ? "Done" : "Pending") + ")").join("; ")}`,
+        `Automations: ${dbContext.automations.map(a => a.name + " (" + (a.active ? "Active" : "Paused") + ")").join("; ")}`,
+        `Subscriptions: ${dbContext.subscriptions.map(s => s.name + " (" + s.price + ")").join(", ")}`,
+        `Vault Documents: ${dbContext.vaultDocuments.map(d => d.name + " (Expires " + d.expiryDate + ")").join(", ")}`,
+      ].join("\n");
+
+      const systemPrompt = `You are LifeSync AI, a highly intelligent, empathetic, proactive personal intelligence and obligation operating system.
+You have access to the user's real-time personal ledger, tasks, subscriptions, and schedule.
+You can answer ANY question the user asks — from specific questions about their obligations, bills, dates, reasoning, and savings, to general knowledge, coding, life advice, scheduling, writing, analysis, and problem-solving.
+Be concise, helpful, insightful, and natural.
+
+${liveContextSummary}`;
+
+      // 1. If user supplied their own Gemini API key
+      if (dbContext.user.geminiApiKey && dbContext.user.geminiApiKey.trim()) {
+        try {
+          const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${dbContext.user.geminiApiKey.trim()}`;
+          const contents = conversationHistory.slice(-6).map(msg => ({
+            role: msg.role === "assistant" ? "model" : "user",
+            parts: [{ text: msg.text }]
+          }));
+          contents.push({ role: "user", parts: [{ text: prompt }] });
+
+          const res = await fetch(geminiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents,
+              systemInstruction: { parts: [{ text: systemPrompt }] }
+            })
+          });
+          if (res.ok) {
+            const data = await res.json();
+            const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (text) return text;
+          }
+        } catch (e) {
+          console.warn("Direct Gemini API key failed, falling back to public neural endpoint", e);
+        }
+      }
+
+      // 2. High-speed Live Multi-Model LLM Endpoint (Pollinations AI Open LLM Engine)
+      try {
+        const messages = [
+          { role: "system", content: systemPrompt },
+          ...conversationHistory.slice(-4).map(m => ({ role: m.role, content: m.text })),
+          { role: "user", content: prompt }
+        ];
+
+        const response = await fetch("https://text.pollinations.ai/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            messages,
+            model: "openai",
+            seed: 42,
+            jsonMode: false
+          })
+        });
+
+        if (response.ok) {
+          const text = await response.text();
+          if (text && text.trim()) return text.trim();
+        }
+      } catch (err) {
+        console.warn("Public neural LLM error:", err);
+      }
+
+      // 3. Robust Contextual Local Reasoning Engine Fallback (Instant & accurate)
+      const q = prompt.toLowerCase();
+      if (q.includes("insurance") || q.includes("oct 11") || q.includes("renew") || q.includes("vehicle") || q.includes("car")) {
+        return `Your Hyundai Creta insurance (HDFC ERGO) expires on Oct 15. Because endorsement takes 2–3 business days at HDFC ERGO and your Goa road trip starts on Saturday, Oct 17, LifeSync recommends paying by Friday, Oct 11. This prevents weekend banking freezes and guarantees active zero-dep and roadside assistance before departure.`;
+      }
+      if (q.includes("save") || q.includes("subscription") || q.includes("cloud") || q.includes("storage")) {
+        return `You currently have overlapping 2TB quotas on both Google One (₹6,500/yr) and Apple iCloud+ (₹749/mo). Consolidating into one provider will save you ₹1,200 every month (₹14,400/year).`;
+      }
+      if (q.includes("passport") || q.includes("travel") || q.includes("document")) {
+        return `Your Indian Passport (Z9401824) expires in June 2027 (approx 180 days remaining). Because most international destinations require a minimum of 6 months validity, you can submit a Tatkaal renewal via the Document Vault anytime.`;
+      }
+      if (q.includes("load") || q.includes("strain") || q.includes("cognitive") || q.includes("summary") || q.includes("overview")) {
+        return `Overview for ${dbContext.user.name}: You have ${dbContext.metrics.criticalObligations} critical obligations queued. Cognitive load is currently at ${dbContext.metrics.cognitiveLoadPct}%. Your next deadline is ${dbContext.adminItems[0]?.title || "Vehicle Insurance Renewal"}.`;
+      }
+
+      return `I have analyzed your query regarding "${prompt}". As your LifeSync AI operating system, I am actively monitoring your connected sources (Gmail, HDFC, Vahan, BESCOM, iCloud, Figma) to keep your schedule, finances, and travel completely protected.`;
+    }
+
+    // --- Main React Component ---
+    function App() {
+      const [db, setDb] = useState(null);
+      const [loading, setLoading] = useState(true);
+      const [activeNav, setActiveNav] = useState("dashboard");
+      const [navOpen, setNavOpen] = useState(false);
+      const [toasts, setToasts] = useState([]);
+      const [busyKeys, setBusyKeys] = useState({});
+
+      // Modals
+      const [aiModalOpen, setAiModalOpen] = useState(false);
+      const [quickAddOpen, setQuickAddOpen] = useState(false);
+      const [addTimelineOpen, setAddTimelineOpen] = useState(false);
+      const [addAutomationOpen, setAddAutomationOpen] = useState(false);
+      const [graphModalOpen, setGraphModalOpen] = useState(false);
+      const [directionsModalOpen, setDirectionsModalOpen] = useState(false);
+      const [reviewModalOpen, setReviewModalOpen] = useState(false);
+      const [celebrationData, setCelebrationData] = useState(null);
+
+      // AI Chat State
+      const [aiPrompt, setAiPrompt] = useState("");
+      const [aiHistory, setAiHistory] = useState([
+        { role: "assistant", text: "Hello Arun! I am your real-time LifeSync AI assistant. I have full context of your obligations, timeline, automations, and documents. Ask me anything — about your schedule, finances, general knowledge, coding, or life advice!" }
+      ]);
+      const [aiBusy, setAiBusy] = useState(false);
+      const chatEndRef = useRef(null);
+
+      // Quick Add State
+      const [qaTitle, setQaTitle] = useState("");
+      const [qaAmount, setQaAmount] = useState("");
+      const [qaDate, setQaDate] = useState("");
+
+      // Add Timeline Event Form State
+      const [tlTitle, setTlTitle] = useState("");
+      const [tlDate, setTlDate] = useState("");
+      const [tlCategory, setTlCategory] = useState("Critical Action");
+      const [tlTone, setTlTone] = useState("danger");
+      const [tlDescription, setTlDescription] = useState("");
+      const [tlAmount, setTlAmount] = useState("");
+
+      // Add Automation Form State
+      const [autName, setAutName] = useState("");
+      const [autTrigger, setAutTrigger] = useState("");
+      const [autAction, setAutAction] = useState("");
+      const [autCategory, setAutCategory] = useState("Bills & Payments");
+
+      // Global Search
+      const [searchQuery, setSearchQuery] = useState("");
+      const [searchResults, setSearchResults] = useState([]);
+      const searchRef = useRef(null);
+
+      const showToast = useCallback((message, tone = "success") => {
+        const id = Date.now() + Math.random();
+        setToasts((prev) => [...prev, { id, message, tone }]);
+        setTimeout(() => {
+          setToasts((prev) => prev.filter((t) => t.id !== id));
+        }, 3500);
+      }, []);
+
+      useEffect(() => {
+        DeviceDatabase.load().then((loaded) => {
+          setDb(loaded);
+          setLoading(false);
+        });
+      }, []);
+
+      const updateDb = useCallback((updater) => {
+        setDb((prev) => {
+          const next = typeof updater === "function" ? updater(prev) : updater;
+          DeviceDatabase.save(next);
+          return next;
+        });
+      }, []);
+
+      const triggerObjectiveCompleted = useCallback(({ title, details, loadReduction = 15, savedAmount = null }) => {
+        playCelebrationChime();
+        triggerConfetti();
+        setCelebrationData({
+          title,
+          details,
+          loadReduction,
+          savedAmount,
+        });
+      }, []);
+
+      useEffect(() => {
+        chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, [aiHistory, aiBusy]);
+
+      useEffect(() => {
+        const onKeyDown = (e) => {
+          if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+            e.preventDefault();
+            searchRef.current?.focus();
+          }
+        };
+        window.addEventListener("keydown", onKeyDown);
+        return () => window.removeEventListener("keydown", onKeyDown);
+      }, []);
+
+      useEffect(() => {
+        if (!db || !searchQuery.trim()) {
+          setSearchResults([]);
+          return;
+        }
+        const q = searchQuery.toLowerCase();
+        const results = [];
+
+        if (db.priority.title.toLowerCase().includes(q) || db.priority.reference.toLowerCase().includes(q)) {
+          results.push({ id: db.priority.id, title: db.priority.title, type: "Priority Obligation", tab: "dashboard" });
+        }
+        db.adminItems.forEach((it) => {
+          if (it.title.toLowerCase().includes(q)) results.push({ id: it.id, title: it.title, type: "Admin Task", tab: "dashboard" });
+        });
+        db.timelineEvents?.forEach((t) => {
+          if (t.title.toLowerCase().includes(q)) results.push({ id: t.id, title: t.title, type: "Timeline Event", tab: "timeline" });
+        });
+        db.automations?.forEach((a) => {
+          if (a.name.toLowerCase().includes(q)) results.push({ id: a.id, title: a.name, type: "Automation", tab: "automations" });
+        });
+        db.vaultDocuments.forEach((doc) => {
+          if (doc.name.toLowerCase().includes(q) || doc.docNumber.toLowerCase().includes(q)) results.push({ id: doc.id, title: doc.name, type: "Vault Document", tab: "vault" });
+        });
+        db.subscriptions.forEach((s) => {
+          if (s.name.toLowerCase().includes(q)) results.push({ id: s.id, title: s.name, type: "Subscription", tab: "subscriptions" });
+        });
+
+        setSearchResults(results);
+      }, [searchQuery, db]);
+
+      // --- Actions ---
+
+      // Pay Priority Insurance
+      const handlePayPriorityInsurance = async () => {
+        setBusyKeys((prev) => ({ ...prev, payPriority: true }));
+        await new Promise((r) => setTimeout(r, 600));
+
+        updateDb((prev) => {
+          const next = { ...prev };
+          next.priority.completed = true;
+          next.metrics.criticalObligations = Math.max(0, next.metrics.criticalObligations - 1);
+          next.metrics.cognitiveLoadPct = Math.max(10, next.metrics.cognitiveLoadPct - 24);
+          next.metrics.cognitiveLoadDeltaPct = Math.max(0, next.metrics.cognitiveLoadDeltaPct - 18);
+          next.transactions = [
+            {
+              id: "tx_" + Date.now(),
+              title: "Vehicle Insurance Renewal (HDFC ERGO)",
+              amount: next.priority.amount,
+              date: "Today",
+              status: "Paid",
+              category: "Automotive",
+            },
+            ...next.transactions,
+          ];
+          next.checklists = next.checklists.map(c => ({
+            ...c,
+            items: c.items.map(it => it.obligationId === "ob_insurance_001" ? { ...it, done: true } : it)
+          }));
+          next.timelineEvents = next.timelineEvents.map(t => t.obligationId === "ob_insurance_001" ? { ...t, completed: true } : t);
+          return next;
+        });
+
+        setBusyKeys((prev) => ({ ...prev, payPriority: false }));
+        triggerObjectiveCompleted({
+          title: "Vehicle Insurance Successfully Renewed!",
+          details: "HDFC ERGO Comprehensive Policy renewed for Hyundai Creta (KA-01-MJ-4021). Endorsement submitted before Goa trip.",
+          loadReduction: 24,
+          savedAmount: 8420,
+        });
+      };
+
+      // Snooze Priority
+      const handleSnoozePriority = () => {
+        updateDb((prev) => ({
+          ...prev,
+          priority: {
+            ...prev.priority,
+            expiryLabel: "Snoozed to Oct 13, 2026 (4 days away)",
+            detectedLabel: "Snoozed 2 days by user preference",
+          }
+        }));
+        showToast("Priority obligation snoozed for 2 days", "info");
+      };
+
+      // Admin Action
+      const handleAdminAction = async (item) => {
+        if (item.id === "adm_doctor") {
+          setDirectionsModalOpen(true);
+          return;
+        }
+        if (item.id === "adm_figma") {
+          setReviewModalOpen(true);
+          return;
+        }
+
+        setBusyKeys((prev) => ({ ...prev, [item.id]: true }));
+        await new Promise((r) => setTimeout(r, 500));
+
+        updateDb((prev) => {
+          const next = { ...prev };
+          next.adminItems = next.adminItems.map((it) => it.id === item.id ? { ...it, completed: true } : it);
+          next.metrics.criticalObligations = Math.max(0, next.metrics.criticalObligations - 1);
+          next.metrics.cognitiveLoadPct = Math.max(10, next.metrics.cognitiveLoadPct - 12);
+          if (item.amount) {
+            next.transactions = [
+              {
+                id: "tx_" + Date.now(),
+                title: item.title,
+                amount: item.amount,
+                date: "Today",
+                status: "Paid",
+                category: "Utilities",
+              },
+              ...next.transactions,
+            ];
+          }
+          return next;
+        });
+
+        setBusyKeys((prev) => ({ ...prev, [item.id]: false }));
+        triggerObjectiveCompleted({
+          title: `Task Completed: ${item.title}`,
+          details: `Successfully paid and resolved ${item.title}. Friction item cleared from daily administrative queue.`,
+          loadReduction: 12,
+          savedAmount: item.amount || null,
+        });
+      };
+
+      // Complete Doctor Prep
+      const handleCompleteDoctorPrep = () => {
+        updateDb((prev) => ({
+          ...prev,
+          adminItems: prev.adminItems.map((it) => it.id === "adm_doctor" ? { ...it, completed: true } : it),
+          metrics: {
+            ...prev.metrics,
+            criticalObligations: Math.max(0, prev.metrics.criticalObligations - 1),
+            cognitiveLoadPct: Math.max(10, prev.metrics.cognitiveLoadPct - 8),
+          }
+        }));
+        setDirectionsModalOpen(false);
+        triggerObjectiveCompleted({
+          title: "Appointment Prep Completed!",
+          details: "Dr. Sharma's appointment directions, medical records, and parking instructions saved to device calendar.",
+          loadReduction: 8,
+        });
+      };
+
+      // Add Custom Timeline Event
+      const handleAddTimelineSubmit = (e) => {
+        e.preventDefault();
+        if (!tlTitle.trim() || !tlDate) return;
+
+        const dateObj = new Date(tlDate);
+        const dateFormatted = dateObj.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", weekday: "long" });
+        const numAmount = tlAmount ? parseFloat(tlAmount.replace(/[^0-9.]/g, "")) : null;
+
+        const newEvent = {
+          id: "tl_" + Date.now(),
+          title: tlTitle,
+          date: tlDate,
+          dateFormatted,
+          category: tlCategory,
+          tone: tlTone,
+          description: tlDescription || "Custom timeline milestone added by user.",
+          amount: numAmount,
+          completed: false,
+        };
+
+        updateDb((prev) => ({
+          ...prev,
+          timelineEvents: [...(prev.timelineEvents || []), newEvent].sort((a,b) => new Date(a.date) - new Date(b.date))
+        }));
+
+        setTlTitle("");
+        setTlDate("");
+        setTlDescription("");
+        setTlAmount("");
+        setAddTimelineOpen(false);
+        showToast(`Added "${tlTitle}" to Intelligent Timeline!`, "success");
+      };
+
+      // Toggle / Complete Timeline Event
+      const handleToggleTimelineEvent = (eventId) => {
+        const ev = db.timelineEvents?.find(t => t.id === eventId);
+        if (!ev) return;
+
+        updateDb((prev) => ({
+          ...prev,
+          timelineEvents: prev.timelineEvents.map(t => t.id === eventId ? { ...t, completed: !t.completed } : t)
+        }));
+
+        if (!ev.completed) {
+          triggerObjectiveCompleted({
+            title: `Timeline Event Completed: ${ev.title}`,
+            details: `Milestone on ${ev.dateFormatted} successfully verified and completed.`,
+            loadReduction: 10,
+            savedAmount: ev.amount || null,
+          });
+        }
+      };
+
+      // Delete Timeline Event
+      const handleDeleteTimelineEvent = (eventId, e) => {
+        e.stopPropagation();
+        updateDb((prev) => ({
+          ...prev,
+          timelineEvents: prev.timelineEvents.filter(t => t.id !== eventId)
+        }));
+        showToast("Timeline event removed", "info");
+      };
+
+      // Add Custom Automation
+      const handleAddAutomationSubmit = (e) => {
+        e.preventDefault();
+        if (!autName.trim() || !autTrigger.trim() || !autAction.trim()) return;
+
+        const newAuto = {
+          id: "aut_" + Date.now(),
+          name: autName,
+          trigger: autTrigger,
+          action: autAction,
+          category: autCategory,
+          active: true,
+          runs: 0,
+        };
+
+        updateDb((prev) => ({
+          ...prev,
+          automations: [newAuto, ...(prev.automations || [])],
+        }));
+
+        setAutName("");
+        setAutTrigger("");
+        setAutAction("");
+        setAddAutomationOpen(false);
+        showToast(`Created automation guardrail: "${autName}"`, "success");
+      };
+
+      // Run Automation Instantly
+      const handleRunAutomation = (autoId) => {
+        const auto = db.automations.find(a => a.id === autoId);
+        if (!auto) return;
+        updateDb((prev) => ({
+          ...prev,
+          automations: prev.automations.map(a => a.id === autoId ? { ...a, runs: a.runs + 1 } : a)
+        }));
+        triggerObjectiveCompleted({
+          title: `Automation Executed: ${auto.name}`,
+          details: `Trigger "${auto.trigger}" matched. Executed: "${auto.action}".`,
+          loadReduction: 5,
+        });
+      };
+
+      // Delete Automation
+      const handleDeleteAutomation = (autoId) => {
+        updateDb((prev) => ({
+          ...prev,
+          automations: prev.automations.filter(a => a.id !== autoId)
+        }));
+        showToast("Automation rule deleted", "info");
+      };
+
+      // Toggle Automation Active
+      const handleToggleAutomation = (autoId) => {
+        updateDb((prev) => ({
+          ...prev,
+          automations: prev.automations.map((a) => a.id === autoId ? { ...a, active: !a.active } : a)
+        }));
+        showToast("Automation rule status updated", "info");
+      };
+
+      // Send Real AI Message
+      const handleSendAiMessage = async (customPrompt) => {
+        const query = customPrompt || aiPrompt;
+        if (!query.trim()) return;
+
+        const newHistory = [...aiHistory, { role: "user", text: query }];
+        setAiHistory(newHistory);
+        setAiPrompt("");
+        setAiBusy(true);
+
+        try {
+          const aiReply = await queryLiveAI(query, aiHistory, db);
+          setAiHistory([...newHistory, { role: "assistant", text: aiReply }]);
+        } catch (e) {
+          setAiHistory([...newHistory, { role: "assistant", text: "I encountered a network issue, but LifeSync Neural Engine is actively safeguarding your stored data." }]);
+        } finally {
+          setAiBusy(false);
+        }
+      };
+
+      // Quick Add Submit
+      const handleQuickAddSubmit = (e) => {
+        e.preventDefault();
+        if (!qaTitle.trim()) return;
+
+        const numAmount = qaAmount ? parseFloat(qaAmount.replace(/[^0-9.]/g, "")) : null;
+        const newItem = {
+          id: "adm_" + Date.now(),
+          icon: "sparkle",
+          title: qaTitle,
+          badge: { label: "Custom", tone: "indigo" },
+          amount: numAmount,
+          amountLabel: numAmount ? formatINR(numAmount) : undefined,
+          meta: qaDate ? `Due on ${qaDate}` : "Added via Quick Add",
+          metaIcon: "calendar",
+          action: { label: "Mark Done", variant: "primary", icon: "check" },
+          completed: false,
+        };
+
+        updateDb((prev) => ({
+          ...prev,
+          metrics: {
+            ...prev.metrics,
+            criticalObligations: prev.metrics.criticalObligations + 1,
+            cognitiveLoadPct: Math.min(100, prev.metrics.cognitiveLoadPct + 5),
+          },
+          adminItems: [newItem, ...prev.adminItems],
+        }));
+
+        setQaTitle("");
+        setQaAmount("");
+        setQaDate("");
+        setQuickAddOpen(false);
+        showToast(`Saved "${qaTitle}" to local device database`, "success");
+      };
+
+      // Force Sync
+      const handleForceSync = () => {
+        showToast("Synchronizing with Google Workspace, HDFC Netbanking, Vahan & BESCOM…", "info");
+        setTimeout(() => {
+          updateDb((prev) => ({
+            ...prev,
+            sync: {
+              ...prev.sync,
+              lastSyncedLabel: "Just now",
+            }
+          }));
+          showToast("All 6 apps synchronized successfully. Device database up to date.", "success");
+        }, 700);
+      };
+
+      // Export JSON
+      const handleExportDatabase = () => {
+        const jsonStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db, null, 2));
+        const dlAnchor = document.createElement("a");
+        dlAnchor.setAttribute("href", jsonStr);
+        dlAnchor.setAttribute("download", `lifesync-ai-backup-${new Date().toISOString().slice(0, 10)}.json`);
+        document.body.appendChild(dlAnchor);
+        dlAnchor.click();
+        dlAnchor.remove();
+        showToast("Database exported to local JSON file", "success");
+      };
+
+      // Import JSON
+      const handleImportDatabase = (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          try {
+            const parsed = JSON.parse(ev.target.result);
+            if (parsed && parsed.user) {
+              updateDb(parsed);
+              showToast("Device database successfully restored from file!", "success");
+            } else {
+              showToast("Invalid LifeSync backup file", "error");
+            }
+          } catch (err) {
+            showToast("Failed to parse JSON backup", "error");
+          }
+        };
+        reader.readAsText(file);
+      };
+
+      if (loading || !db) {
+        return (
+          <div className="state" style={{ maxWidth: 700, margin: "100px auto", padding: 20 }}>
+            <div className="skeleton" style={{ height: 60, width: "60%", borderRadius: 12, marginBottom: 20 }} />
+            <div className="skeleton" style={{ height: 260, borderRadius: 16, marginBottom: 20 }} />
+            <div className="skeleton" style={{ height: 160, borderRadius: 16 }} />
+          </div>
+        );
+      }
+
+      const { user, sync, metrics, priority, adminItems, upcoming, upcomingRange, load, insights, timelineEvents, automations } = db;
+
+      // ================= VIEW RENDERERS =================
+
+      // 1. DASHBOARD VIEW
+      const renderDashboardView = () => (
+        <>
+          <section className="greeting">
+            <div className="greeting__copy">
+              <span className="chip chip--engine">
+                ✦ LifeSync Neural Engine is actively synchronizing {sync.sourcesCount} data sources
+              </span>
+              <h1 className="greeting__title">
+                Good afternoon, {user.shortName}.
+              </h1>
+              <p className="greeting__lead">
+                You have <strong>{metrics.criticalObligations} critical obligations</strong> requiring decisive attention this week.
+              </p>
+            </div>
+
+            <div className="metrics">
+              <div className="metric">
+                <span className="metric__icon">
+                  <Icon name="brain" size={16} />
+                </span>
+                <div>
+                  <p className="metric__label">Cognitive Load</p>
+                  <p className="metric__value">
+                    {metrics.cognitiveLoadPct}%{" "}
+                    <span className="metric__delta">(+{metrics.cognitiveLoadDeltaPct}%)</span>
+                  </p>
+                </div>
+              </div>
+              <div className="metric">
+                <span className="metric__icon">
+                  <Icon name="shield" size={16} />
+                </span>
+                <div>
+                  <p className="metric__label">Automation Health</p>
+                  <p className="metric__value">{metrics.automationHealthPct}% Guarded</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section className="hero card">
+            <span className="hero__glow" aria-hidden="true" />
+            <span className="hero__edge" aria-hidden="true" />
+
+            <div className="hero__body">
+              <div className="hero__meta">
+                <div className="hero__badges">
+                  <span className={`chip ${priority.completed ? "chip--live" : "chip--urgent"}`}>
+                    <span className={`dot ${priority.completed ? "dot--emerald" : "dot--pink"}`} />
+                    {priority.completed ? "Priority #1 • Resolved & Protected" : "Priority #1 • High Urgency"}
+                  </span>
+                  <span className="chip chip--confidence">
+                    <Icon name="sparkle" size={12} />
+                    {priority.confidencePct}% AI Confidence
+                  </span>
+                </div>
+                <span className="hero__detected">
+                  <Icon name="calendar" size={12} />
+                  {priority.detectedLabel}
+                </span>
+              </div>
+
+              <div className="hero__head">
+                <div className="hero__titles">
+                  <h2 className="hero__title">{priority.title}</h2>
+                  <div className="hero__sub">
+                    <span className="tag">{priority.provider}</span>
+                    <span className="sep">•</span>
+                    <span className="mono">{priority.reference}</span>
+                  </div>
+                  <p className="hero__expiry" style={{ color: priority.completed ? "var(--emerald)" : "var(--danger-soft)" }}>
+                    <Icon name={priority.completed ? "checkCircle" : "alert"} size={14} />
+                    {priority.completed ? "Endorsement Verified for Goa Trip" : priority.expiryLabel}
+                  </p>
+                </div>
+
+                <div className="hero__price">
+                  <p className="eyebrow">Premium Payable</p>
+                  <p className="hero__amount">{formatINR(priority.amount)}</p>
+                  <p className="hero__recommend">
+                    <Icon name="bolt" size={12} />
+                    {priority.completed ? "Completed & Added to Ledger" : priority.recommendation}
+                  </p>
+                </div>
+              </div>
+
+              <div className="reasoning">
+                <p className="eyebrow eyebrow--icon">
+                  <Icon name="graph" size={13} />
+                  Causal Reasoning Graph
+                </p>
+                <ul className="reasoning__flow">
+                  {priority.reasoning.map((step, i) => (
+                    <li className="reasoning__step" key={step.id}>
+                      <span className="flow-tag">
+                        <span className={`dot dot--${step.tone}`} />
+                        <span className="flow-tag__src">{step.source}</span>
+                        <span className="flow-tag__detail">{step.detail}</span>
+                      </span>
+                      {i < priority.reasoning.length - 1 && (
+                        <Icon name="arrow" size={12} className="reasoning__arrow" />
+                      )}
+                    </li>
+                  ))}
+                </ul>
+                <p className="reasoning__narrative">
+                  {priority.narrative.before}
+                  <strong>{priority.narrative.date1}</strong>
+                  {priority.narrative.middle}
+                  <strong className="accent">{priority.narrative.date2}</strong>
+                  {priority.narrative.after}
+                </p>
+              </div>
+
+              <div className="hero__actions">
+                <div className="hero__primary">
+                  <button
+                    className={`btn btn--lg ${priority.completed ? "btn--emerald" : "btn--soft-blue"}`}
+                    onClick={handlePayPriorityInsurance}
+                    disabled={priority.completed || busyKeys.payPriority}
+                  >
+                    <Icon name={priority.completed ? "checkCircle" : busyKeys.payPriority ? "refresh" : "lock"} size={16} />
+                    {priority.completed
+                      ? "Paid & Policy Endorsed"
+                      : busyKeys.payPriority
+                      ? "Processing Transaction…"
+                      : `${priority.primaryActionLabel} • Pay ${formatINR(priority.amount)}`}
+                  </button>
+                  <button
+                    className="btn btn--lg btn--chip"
+                    onClick={() => setGraphModalOpen(true)}
+                  >
+                    <Icon name="graph" size={15} />
+                    Inspect Relationship Graph
+                  </button>
+                </div>
+
+                <div className="hero__secondary">
+                  <button
+                    className="btn btn--text"
+                    onClick={handleSnoozePriority}
+                    disabled={priority.completed}
+                  >
+                    <Icon name="snooze" size={14} />
+                    Snooze 2 Days
+                  </button>
+                  <button
+                    className="btn btn--text"
+                    onClick={() => showToast("Forwarded policy details & tax context to your CA", "success")}
+                    disabled={priority.completed}
+                  >
+                    <Icon name="delegate" size={14} />
+                    Delegate to CA
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <div className="workspace">
+            <div className="workspace__col workspace__col--main">
+              <section className="card panel">
+                <div className="panel__head">
+                  <div className="panel__title-group">
+                    <span className="panel__icon">
+                      <Icon name="bolt" size={15} />
+                    </span>
+                    <div>
+                      <h3 className="panel__title">Today's Critical Admin</h3>
+                      <p className="panel__sub">Actionable friction items queued for execution</p>
+                    </div>
+                  </div>
+                  <span className="chip chip--count">
+                    {adminItems.filter((i) => !i.completed).length} Pending
+                  </span>
+                </div>
+
+                <ul className="stack">
+                  {adminItems.map((item) => {
+                    const isBusy = busyKeys[item.id];
+                    return (
+                      <li className="row" key={item.id} style={{ opacity: item.completed ? 0.6 : 1 }}>
+                        <div className="row__main">
+                          <span className="row__icon">
+                            <Icon
+                              name={item.completed ? "check" : item.icon === "doctor" ? "medical" : item.icon}
+                              size={16}
+                            />
+                          </span>
+                          <div className="row__text">
+                            <div className="row__title-line">
+                              <h4 className="row__title" style={{ textDecoration: item.completed ? "line-through" : "none" }}>
+                                {item.title}
+                              </h4>
+                              {item.badge && (
+                                <span className={`badge badge--${item.completed ? "emerald" : item.badge.tone}`}>
+                                  {item.completed ? "Completed" : item.badge.label}
+                                </span>
+                              )}
+                            </div>
+                            <p
+                              className={`row__meta ${
+                                item.metaTone === "danger" && !item.completed ? "row__meta--danger" : ""
+                              }`}
+                            >
+                              {item.amountLabel && (
+                                <>
+                                  <strong>{item.amountLabel}</strong>
+                                  <span className="sep">•</span>
+                                </>
+                              )}
+                              {item.metaIcon && <Icon name={item.metaIcon} size={12} />}
+                              <span>{item.meta}</span>
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          className={`btn btn--sm ${
+                            item.completed
+                              ? "btn--chip"
+                              : item.action?.variant === "primary"
+                              ? "btn--blue"
+                              : "btn--chip"
+                          }`}
+                          onClick={() => handleAdminAction(item)}
+                          disabled={item.completed || isBusy}
+                        >
+                          <Icon name={item.completed ? "check" : isBusy ? "refresh" : item.action?.icon || "check"} size={13} />
+                          {item.completed ? "Done" : isBusy ? "Processing…" : item.action?.label || "Execute"}
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </section>
+
+              <section className="card panel">
+                <div className="panel__head">
+                  <div className="panel__title-group">
+                    <span className="panel__icon">
+                      <Icon name="calendar" size={15} />
+                    </span>
+                    <div>
+                      <h3 className="panel__title">Upcoming This Week</h3>
+                      <p className="panel__sub">Synthesized timeline for pre-trip stability</p>
+                    </div>
+                  </div>
+                  <span className="panel__range">{upcomingRange}</span>
+                </div>
+
+                <ul className="stack stack--tight">
+                  {upcoming.map((u) => (
+                    <li className="row row--soft" key={u.id}>
+                      <div className="row__main row__main--center">
+                        <span className="date-tile">
+                          <span className="date-tile__month">{u.month}</span>
+                          <span className="date-tile__day">{u.day}</span>
+                        </span>
+                        <div className="row__text">
+                          <h4 className="row__title">{u.title}</h4>
+                          <p className="row__meta row__meta--soft">
+                            {u.amountLabel && <strong>{u.amountLabel}</strong>}
+                            <span>{u.subtitle}</span>
+                          </p>
+                        </div>
+                      </div>
+                      <span className={`status status--${u.status.tone}`}>
+                        {u.status.label}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            </div>
+
+            <div className="workspace__col workspace__col--side">
+              <section className="card panel">
+                <div className="panel__head">
+                  <div>
+                    <h3 className="panel__title">Obligation Load &amp; Strain</h3>
+                    <p className="panel__sub">Computational projection across next 7 days</p>
+                  </div>
+                  <Icon name="chartSearch" size={20} className="panel__head-icon" />
+                </div>
+
+                <div className="chart">
+                  <div className="chart__bars">
+                    {load.days.map((d) => {
+                      const isProtected = d.tone === "protected";
+                      const isSpike = d.tone === "danger";
+                      return (
+                        <div
+                          className={`bar bar--${d.tone} ${isSpike ? "bar--spike" : ""}`}
+                          key={d.id}
+                          onClick={() => showToast(`${d.label}: ${d.value || "Protected"} tasks scheduled`, "info")}
+                        >
+                          <span className="bar__value">
+                            {isProtected ? "Protected" : `${d.value} items`}
+                          </span>
+                          <span className="bar__col" style={{ height: d.heightPx }}>
+                            {isProtected && <Icon name="lock" size={11} />}
+                          </span>
+                          <span className="bar__label">{d.label}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <p className="chart__note">
+                    <Icon name="sparkle" size={13} />
+                    <span>
+                      Administrative load is{" "}
+                      <strong>{load.percentHigher}% higher than last week</strong> due to trip
+                      prep deadlines. LifeSync shifted {load.shiftedTasks} low-priority tasks to
+                      next week.
+                    </span>
+                  </p>
+                </div>
+              </section>
+
+              <section className="card panel">
+                <div className="panel__head">
+                  <div className="panel__title-group">
+                    <span className="panel__icon">
+                      <Icon name="sparkle" size={15} />
+                    </span>
+                    <div>
+                      <h3 className="panel__title">Proactive AI Insights</h3>
+                      <p className="panel__sub">Contextual cross-domain optimizations</p>
+                    </div>
+                  </div>
+                  <span className="chip chip--live">Live Feed</span>
+                </div>
+
+                <ul className="stack">
+                  {insights.map((it) => {
+                    const isDone = it.applied;
+                    const iconMap = {
+                      collision: "alert",
+                      subscription: "cloud",
+                      document: "passport",
+                    };
+                    return (
+                      <li className="insight" key={it.id}>
+                        <Icon
+                          name={iconMap[it.kind] || "sparkle"}
+                          size={16}
+                          className={`insight__icon ${
+                            it.kind === "collision" ? "insight__icon--danger" : ""
+                          }`}
+                        />
+                        <div className="insight__body">
+                          <h4 className="insight__title">{it.title}</h4>
+                          <p className="insight__text">
+                            {it.body}
+                            {it.highlight && (
+                              <strong className="accent">{it.highlight}</strong>
+                            )}
+                          </p>
+
+                          {it.cta.kind === "link" && (
+                            <div className="insight__foot">
+                              <span className="insight__applied">
+                                {isDone ? "Applied to Timeline" : "Ready to apply"}
+                              </span>
+                              <span className="sep">•</span>
+                              <button
+                                className="link-btn"
+                                onClick={() => setGraphModalOpen(true)}
+                              >
+                                {it.cta.label}
+                              </button>
+                            </div>
+                          )}
+                          {it.cta.kind === "button" && (
+                            <div className="insight__foot">
+                              <button
+                                className="btn btn--xs btn--chip"
+                                onClick={() => setActiveNav("subscriptions")}
+                              >
+                                {it.cta.label}
+                                <Icon name="arrow" size={10} />
+                              </button>
+                            </div>
+                          )}
+                          {it.cta.kind === "external" && (
+                            <div className="insight__foot">
+                              <button
+                                className="link-btn link-btn--indigo"
+                                onClick={() => setActiveNav("vault")}
+                              >
+                                {it.cta.label}
+                                <Icon name="external" size={11} />
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </section>
+            </div>
+          </div>
+        </>
+      );
+
+      // 2. TIMELINE VIEW (WITH ADD TIMELINE EVENT FEATURE)
+      const renderTimelineView = () => (
+        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+          <div className="greeting__copy">
+            <h1 className="greeting__title">Intelligent Timeline</h1>
+            <p className="greeting__lead">Unified chronological schedule with customizable events and predictive collision prevention.</p>
+          </div>
+
+          <div className="card panel">
+            <div className="panel__head">
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <span className="panel__icon">
+                  <Icon name="clock" size={16} />
+                </span>
+                <div>
+                  <h3 className="panel__title">Chronological Schedule ({timelineEvents?.length || 0} Events)</h3>
+                  <p className="panel__sub">Add, manage, and execute milestones at your wish</p>
+                </div>
+              </div>
+              <button className="btn btn--sm btn--blue" onClick={() => setAddTimelineOpen(true)}>
+                <Icon name="plus" size={14} /> Add Timeline Event
+              </button>
+            </div>
+
+            <div className="graph-node-container" style={{ gap: 14 }}>
+              {timelineEvents && timelineEvents.length > 0 ? (
+                timelineEvents.map((t) => (
+                  <div
+                    className={`graph-node graph-node--${t.tone || "blue"}`}
+                    key={t.id}
+                    style={{ opacity: t.completed ? 0.6 : 1, transition: "all .2s" }}
+                  >
+                    <div style={{ flex: 1, minWidth: 0, paddingRight: 12 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                        <strong style={{ fontSize: 15, textDecoration: t.completed ? "line-through" : "none" }}>
+                          {t.dateFormatted || t.date}: {t.title}
+                        </strong>
+                        <span className={`badge badge--${t.completed ? "emerald" : t.tone || "neutral"}`}>
+                          {t.completed ? "Completed" : t.category || "Milestone"}
+                        </span>
+                        {t.amount && (
+                          <span className="mono" style={{ fontSize: 12 }}>{formatINR(t.amount)}</span>
+                        )}
+                      </div>
+                      <p style={{ color: "var(--text-secondary)", fontSize: 12, marginTop: 4 }}>
+                        {t.description}
+                      </p>
+                    </div>
+
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+                      <button
+                        className={`btn btn--sm ${t.completed ? "btn--chip" : "btn--soft-blue"}`}
+                        onClick={() => handleToggleTimelineEvent(t.id)}
+                      >
+                        <Icon name={t.completed ? "check" : "checkCircle"} size={13} />
+                        {t.completed ? "Done" : "Mark Completed"}
+                      </button>
+                      <button
+                        className="icon-btn icon-btn--sm"
+                        onClick={(e) => handleDeleteTimelineEvent(t.id, e)}
+                        title="Delete event"
+                      >
+                        <Icon name="trash" size={14} style={{ color: "var(--danger-soft)" }} />
+                      </button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div style={{ padding: 24, textAlign: "center", color: "var(--text-muted)" }}>
+                  No timeline events scheduled. Click "Add Timeline Event" to create one!
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+
+      // 3. AI PLANNER & CHECKLISTS VIEW
+      const renderPlannerView = () => (
+        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+          <div className="greeting__copy">
+            <h1 className="greeting__title">AI Planner &amp; Goal Checklists</h1>
+            <p className="greeting__lead">Cross-domain workflows broken into trackable action items.</p>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))", gap: 20 }}>
+            {db.checklists.map((chk) => {
+              const completedCount = chk.items.filter((i) => i.done).length;
+              const pct = Math.round((completedCount / chk.items.length) * 100);
+              return (
+                <div className="card panel" key={chk.id}>
+                  <div className="panel__head">
+                    <div>
+                      <span className="eyebrow">{chk.category}</span>
+                      <h3 className="panel__title" style={{ marginTop: 2 }}>{chk.title}</h3>
+                    </div>
+                    <span className={`chip ${pct === 100 ? "chip--live" : "chip--count"}`}>
+                      {pct}% Done
+                    </span>
+                  </div>
+
+                  <div style={{ width: "100%", height: 6, background: "var(--bg-chip)", borderRadius: 4, overflow: "hidden" }}>
+                    <div style={{ width: `${pct}%`, height: "100%", background: pct === 100 ? "var(--emerald)" : "var(--blue)", transition: "width .3s" }} />
+                  </div>
+
+                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                    {chk.items.map((item) => (
+                      <div
+                        key={item.id}
+                        className={`checklist-row ${item.done ? "checklist-row--done" : ""}`}
+                        onClick={() => {
+                          let allDone = false;
+                          updateDb((prev) => {
+                            const next = { ...prev };
+                            next.checklists = next.checklists.map(c => {
+                              if (c.id === chk.id) {
+                                const updated = c.items.map(it => it.id === item.id ? { ...it, done: !it.done } : it);
+                                allDone = updated.every(it => it.done);
+                                return { ...c, items: updated };
+                              }
+                              return c;
+                            });
+                            return next;
+                          });
+
+                          if (!item.done) {
+                            if (allDone) {
+                              triggerObjectiveCompleted({
+                                title: `Checklist Completed: ${chk.title}!`,
+                                details: "All items completed and verified!",
+                                loadReduction: 20,
+                              });
+                            } else {
+                              showToast(`Checked "${item.label}"`, "success");
+                            }
+                          }
+                        }}
+                      >
+                        <span className={`checkbox-box ${item.done ? "checkbox-box--checked" : ""}`}>
+                          {item.done && <Icon name="check" size={14} strokeWidth={3} />}
+                        </span>
+                        <span style={{ fontSize: 13, flex: 1, fontWeight: item.done ? 400 : 500 }}>
+                          {item.label}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      );
+
+      // 4. UNIVERSAL INBOX
+      const renderInboxView = () => (
+        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+          <div className="greeting__copy">
+            <h1 className="greeting__title">Universal Inbox</h1>
+            <p className="greeting__lead">Centralized inbox capturing email receipts, bills, and notifications.</p>
+          </div>
+
+          <div className="card panel">
+            <div className="panel__head">
+              <h3 className="panel__title">Captured Feed ({db.inbox.length} Items)</h3>
+              <button
+                className="btn btn--sm btn--chip"
+                onClick={() => {
+                  updateDb((prev) => ({
+                    ...prev,
+                    inbox: prev.inbox.map((i) => ({ ...i, read: true })),
+                  }));
+                  showToast("Marked all inbox items as read", "info");
+                }}
+              >
+                Mark All Read
+              </button>
+            </div>
+
+            <ul className="stack">
+              {db.inbox.map((ib) => (
+                <li className="row" key={ib.id} style={{ opacity: ib.read ? 0.7 : 1 }}>
+                  <div className="row__main">
+                    <span className="row__icon">
+                      <Icon name="mail" size={16} />
+                    </span>
+                    <div className="row__text">
+                      <div className="row__title-line">
+                        <h4 className="row__title">{ib.title}</h4>
+                        <span className="badge badge--neutral">{ib.category}</span>
+                      </div>
+                      <p className="row__meta">
+                        <span>{ib.sender}</span>
+                        <span className="sep">•</span>
+                        <span>{ib.time}</span>
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    className="btn btn--sm btn--chip"
+                    onClick={() => {
+                      showToast(`Processed "${ib.title}"`, "success");
+                      updateDb((prev) => ({
+                        ...prev,
+                        inbox: prev.inbox.filter((i) => i.id !== ib.id),
+                      }));
+                    }}
+                  >
+                    Archive
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      );
+
+      // 5. RELATIONSHIP GRAPH VIEW
+      const renderGraphView = () => (
+        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+          <div className="greeting__copy">
+            <h1 className="greeting__title">Autonomous Relationship Graph</h1>
+            <p className="greeting__lead">Cross-domain causal chain linking emails, government ledgers, and road trip constraints.</p>
+          </div>
+
+          <div className="card panel">
+            <div className="panel__head">
+              <h3 className="panel__title">Active Causal Chain for Vehicle Insurance</h3>
+              <span className="chip chip--engine">Realtime Engine</span>
+            </div>
+
+            <div className="graph-node-container" style={{ padding: 24, gap: 16 }}>
+              <div className="graph-node graph-node--danger">
+                <div>
+                  <strong style={{ fontSize: 15 }}>1. Ingestion: Gmail PDF Expiry Notice</strong>
+                  <p style={{ color: "var(--text-muted)", fontSize: 12, marginTop: 4 }}>
+                    Scanned policy renewal notice from HDFC ERGO on Oct 9.
+                  </p>
+                </div>
+                <span className="badge badge--danger">Trigger</span>
+              </div>
+
+              <div style={{ textAlign: "center", color: "var(--text-muted)", fontSize: 13, fontWeight: 700 }}>
+                ↓ validates registration with
+              </div>
+
+              <div className="graph-node">
+                <div>
+                  <strong style={{ fontSize: 15 }}>2. Verification: Vahan National Vehicle Ledger</strong>
+                  <p style={{ color: "var(--text-muted)", fontSize: 12, marginTop: 4 }}>
+                    Match confirmed: Hyundai Creta KA-01-MJ-4021.
+                  </p>
+                </div>
+                <span className="badge badge--neutral">Verified</span>
+              </div>
+
+              <div style={{ textAlign: "center", color: "var(--text-muted)", fontSize: 13, fontWeight: 700 }}>
+                ↓ collides with calendar constraint
+              </div>
+
+              <div className="graph-node graph-node--violet">
+                <div>
+                  <strong style={{ fontSize: 15 }}>3. Conflict: Goa Road Trip (Oct 17–22)</strong>
+                  <p style={{ color: "var(--text-muted)", fontSize: 12, marginTop: 4 }}>
+                    Interstate driving demands active policy endorsement &amp; RSA roadside assistance.
+                  </p>
+                </div>
+                <span className="badge badge--indigo">Constraint</span>
+              </div>
+
+              <div style={{ textAlign: "center", color: "var(--text-muted)", fontSize: 13, fontWeight: 700 }}>
+                ↓ synthesizes optimal action date
+              </div>
+
+              <div className="graph-node graph-node--emerald">
+                <div>
+                  <strong style={{ fontSize: 15 }}>4. Resolution: Pay on Friday, Oct 11</strong>
+                  <p style={{ color: "var(--text-muted)", fontSize: 12, marginTop: 4 }}>
+                    Guarantees endorsement completion before departure with 0 risk of weekend freeze.
+                  </p>
+                </div>
+                <span className="badge badge--emerald">Optimal</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+
+      // 6. AUTOMATIONS VIEW (WITH ADD AUTOMATION FEATURE & RUN TEST)
+      const renderAutomationsView = () => (
+        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+          <div className="greeting__copy">
+            <h1 className="greeting__title">Automations &amp; Guardrails</h1>
+            <p className="greeting__lead">Set deterministic rules for utility bills, travel shields, and price monitoring.</p>
+          </div>
+
+          <div className="card panel">
+            <div className="panel__head">
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <span className="panel__icon">
+                  <Icon name="refresh" size={16} />
+                </span>
+                <div>
+                  <h3 className="panel__title">Active Guardrails ({automations?.length || 0})</h3>
+                  <p className="panel__sub">Create customized triggers and actions as your wish</p>
+                </div>
+              </div>
+              <button
+                className="btn btn--sm btn--blue"
+                onClick={() => setAddAutomationOpen(true)}
+              >
+                <Icon name="plus" size={14} /> New Automation
+              </button>
+            </div>
+
+            <ul className="stack">
+              {automations && automations.length > 0 ? (
+                automations.map((a) => (
+                  <li className="row" key={a.id}>
+                    <div className="row__main">
+                      <span className="row__icon">
+                        <Icon name="refresh" size={16} />
+                      </span>
+                      <div className="row__text">
+                        <div className="row__title-line">
+                          <h4 className="row__title">{a.name}</h4>
+                          <span className={`badge ${a.active ? "badge--emerald" : "badge--neutral"}`}>
+                            {a.active ? "Active" : "Paused"}
+                          </span>
+                          <span className="badge badge--blue">{a.category || "General"}</span>
+                        </div>
+                        <p className="row__meta">
+                          <span><strong>When:</strong> {a.trigger || a.desc}</span>
+                          <span className="sep">•</span>
+                          <span><strong>Action:</strong> {a.action || "Executed"}</span>
+                          <span className="sep">•</span>
+                          <span>Runs: {a.runs}</span>
+                        </p>
+                      </div>
+                    </div>
+
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <button
+                        className="btn btn--sm btn--chip"
+                        onClick={() => handleRunAutomation(a.id)}
+                        title="Simulate execution"
+                      >
+                        <Icon name="play" size={12} /> Test Run
+                      </button>
+                      <button
+                        className={`btn btn--sm ${a.active ? "btn--chip" : "btn--blue"}`}
+                        onClick={() => handleToggleAutomation(a.id)}
+                      >
+                        {a.active ? "Pause" : "Activate"}
+                      </button>
+                      <button
+                        className="icon-btn icon-btn--sm"
+                        onClick={() => handleDeleteAutomation(a.id)}
+                        title="Delete automation"
+                      >
+                        <Icon name="trash" size={14} style={{ color: "var(--danger-soft)" }} />
+                      </button>
+                    </div>
+                  </li>
+                ))
+              ) : (
+                <div style={{ padding: 24, textAlign: "center", color: "var(--text-muted)" }}>
+                  No automations created yet. Click "New Automation" to build your first rule!
+                </div>
+              )}
+            </ul>
+          </div>
+        </div>
+      );
+
+      // 7. CONNECTED APPS VIEW
+      const renderConnectedAppsView = () => (
+        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+          <div className="greeting__copy">
+            <h1 className="greeting__title">Connected Ecosystem</h1>
+            <p className="greeting__lead">Manage live integrations, data connectors, and synchronization frequencies.</p>
+          </div>
+
+          <div className="card panel">
+            <div className="panel__head">
+              <h3 className="panel__title">6 Active Integrations</h3>
+              <button className="btn btn--sm btn--blue" onClick={handleForceSync}>
+                <Icon name="refresh" size={14} /> Force Synchronize All
+              </button>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16 }}>
+              {db.connectedApps.map((app) => (
+                <div className="row" key={app.id} style={{ alignItems: "center" }}>
+                  <div className="row__main" style={{ alignItems: "center" }}>
+                    <span className="row__icon">
+                      <Icon name={app.icon} size={16} />
+                    </span>
+                    <div className="row__text">
+                      <h4 className="row__title">{app.name}</h4>
+                      <p className="row__meta">{app.syncRate}</p>
+                    </div>
+                  </div>
+                  <span className="badge badge--emerald">{app.status}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+
+      // 8. PAYMENTS & LEDGER VIEW
+      const renderPaymentsView = () => (
+        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+          <div className="greeting__copy">
+            <h1 className="greeting__title">Payments &amp; Ledger</h1>
+            <p className="greeting__lead">Unified ledger tracking completed transactions, pending bills, and auto-debits.</p>
+          </div>
+
+          <div className="card panel">
+            <div className="panel__head">
+              <h3 className="panel__title">Transaction History</h3>
+              <button
+                className="btn btn--sm btn--blue"
+                onClick={() => setQuickAddOpen(true)}
+              >
+                <Icon name="plus" size={14} /> Record Payment
+              </button>
+            </div>
+
+            <ul className="stack">
+              {db.transactions.map((tx) => (
+                <li className="row" key={tx.id}>
+                  <div className="row__main">
+                    <span className="row__icon">
+                      <Icon name="wallet" size={16} />
+                    </span>
+                    <div className="row__text">
+                      <div className="row__title-line">
+                        <h4 className="row__title">{tx.title}</h4>
+                        <span className={`badge ${tx.status === "Paid" ? "badge--emerald" : "badge--danger"}`}>
+                          {tx.status}
+                        </span>
+                      </div>
+                      <p className="row__meta">
+                        <strong>{formatINR(tx.amount)}</strong>
+                        <span className="sep">•</span>
+                        <span>{tx.category}</span>
+                        <span className="sep">•</span>
+                        <span>{tx.date}</span>
+                      </p>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      );
+
+      // 9. SUBSCRIPTIONS VIEW
+      const renderSubscriptionsView = () => {
+        const totalMonthly = db.subscriptions.reduce((acc, s) => acc + s.monthlyEq, 0);
+        return (
+          <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+            <div className="greeting__copy">
+              <h1 className="greeting__title">Subscription Optimizer</h1>
+              <p className="greeting__lead">
+                Tracking monthly commitments totaling <strong>{formatINR(totalMonthly)}/month</strong>.
+              </p>
+            </div>
+
+            <div className="card panel" style={{ borderLeft: "4px solid var(--amber)", background: "rgba(255, 183, 77, 0.05)" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <Icon name="alert" size={20} style={{ color: "var(--amber)" }} />
+                <div>
+                  <h4 style={{ fontWeight: 700, fontSize: 15, color: "var(--amber)" }}>Storage Redundancy Detected</h4>
+                  <p style={{ color: "var(--text-secondary)", fontSize: 13, marginTop: 2 }}>
+                    You have active 2TB quotas on both Google One and Apple iCloud+. Canceling one can save <strong>₹1,200/month</strong>.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="card panel">
+              <div className="panel__head">
+                <h3 className="panel__title">Active Subscriptions ({db.subscriptions.length})</h3>
+                <span className="chip chip--count">{formatINR(totalMonthly)} / mo</span>
+              </div>
+
+              <ul className="stack">
+                {db.subscriptions.map((s) => (
+                  <li className="row" key={s.id}>
+                    <div className="row__main">
+                      <span className="row__icon">
+                        <Icon name="repeat" size={16} />
+                      </span>
+                      <div className="row__text">
+                        <div className="row__title-line">
+                          <h4 className="row__title">{s.name}</h4>
+                          <span className="badge badge--neutral">{s.tag}</span>
+                          {s.alert && <span className="badge badge--danger">{s.alert}</span>}
+                          {s.overlap && <span className="badge badge--indigo">Duplicate Storage</span>}
+                        </div>
+                        <p className="row__meta">
+                          <strong>{s.price}</strong>
+                          <span className="sep">•</span>
+                          <span>Next Billing: {s.nextBilling}</span>
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      className="btn btn--sm btn--danger-ghost"
+                      onClick={() => showToast(`Cancellation flow initiated for ${s.name}`, "info")}
+                    >
+                      Manage
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        );
+      };
+
+      // 10. DOCUMENT VAULT VIEW
+      const renderVaultView = () => (
+        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+          <div className="greeting__copy">
+            <h1 className="greeting__title">Document Vault &amp; Expiry Tracker</h1>
+            <p className="greeting__lead">Identity documents, vehicle fitness, and insurance policies with automated renewal alerts.</p>
+          </div>
+
+          <div className="card panel">
+            <div className="panel__head">
+              <h3 className="panel__title">Stored Documents ({db.vaultDocuments.length})</h3>
+              <button
+                className="btn btn--sm btn--blue"
+                onClick={() => showToast("Upload new document modal opened", "info")}
+              >
+                <Icon name="plus" size={14} /> Add Document
+              </button>
+            </div>
+
+            <ul className="stack">
+              {db.vaultDocuments.map((doc) => (
+                <li className="row" key={doc.id}>
+                  <div className="row__main">
+                    <span className="row__icon">
+                      <Icon name="folder" size={16} />
+                    </span>
+                    <div className="row__text">
+                      <div className="row__title-line">
+                        <h4 className="row__title">{doc.name}</h4>
+                        <span className={`badge ${doc.daysLeft < 30 ? "badge--danger" : doc.daysLeft < 200 ? "badge--indigo" : "badge--emerald"}`}>
+                          {doc.status} ({doc.daysLeft} days left)
+                        </span>
+                      </div>
+                      <p className="row__meta">
+                        <span className="mono">{doc.docNumber}</span>
+                        <span className="sep">•</span>
+                        <span>Expires: {doc.expiryDate}</span>
+                        <span className="sep">•</span>
+                        <span>{doc.category}</span>
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    className="btn btn--sm btn--chip"
+                    onClick={() => showToast(`Viewing digital copy for ${doc.name}`, "info")}
+                  >
+                    View Document
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      );
+
+      // 11. NOTIFICATIONS VIEW
+      const renderNotificationsView = () => (
+        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+          <div className="greeting__copy">
+            <h1 className="greeting__title">Notifications Center</h1>
+            <p className="greeting__lead">Realtime alerts generated by LifeSync Neural Engine.</p>
+          </div>
+
+          <div className="card panel">
+            <div className="panel__head">
+              <h3 className="panel__title">Recent Notifications</h3>
+              <button
+                className="btn btn--sm btn--chip"
+                onClick={() => {
+                  updateDb((prev) => ({
+                    ...prev,
+                    notifications: prev.notifications.map((n) => ({ ...n, unread: false })),
+                  }));
+                  showToast("All notifications marked as read", "info");
+                }}
+              >
+                Mark All Read
+              </button>
+            </div>
+
+            <ul className="stack">
+              {db.notifications.map((n) => (
+                <li className="row" key={n.id} style={{ opacity: n.unread ? 1 : 0.7 }}>
+                  <div className="row__main">
+                    <span className="row__icon">
+                      <Icon name="bell" size={16} />
+                    </span>
+                    <div className="row__text">
+                      <h4 className="row__title">{n.title}</h4>
+                      <p className="row__meta">{n.time}</p>
+                    </div>
+                  </div>
+                  <button
+                    className="btn btn--sm btn--blue"
+                    onClick={() => {
+                      setActiveNav(n.linkTab || "dashboard");
+                    }}
+                  >
+                    View
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      );
+
+      // 12. ANALYTICS & SETTINGS VIEW (WITH GEMINI API KEY FIELD)
+      const renderSettingsView = () => (
+        <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+          <div className="greeting__copy">
+            <h1 className="greeting__title">Settings &amp; Device Database</h1>
+            <p className="greeting__lead">Manage user preferences, AI engine keys, local storage, backups, and database synchronization.</p>
+          </div>
+
+          <div className="card panel">
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <Icon name="sparkle" size={18} style={{ color: "var(--violet)" }} />
+              <h3 className="panel__title">Artificial Intelligence Engine Settings</h3>
+            </div>
+            <p style={{ color: "var(--text-secondary)", fontSize: 13 }}>
+              LifeSync AI is powered by our high-speed live multi-model neural endpoint (OpenAI / Claude / Gemini models) by default. You can also optionally enter your personal <strong>Google Gemini API Key</strong> to run directly against Google Gemini 1.5/2.0 Flash.
+            </p>
+
+            <div className="form-group" style={{ maxWidth: 540 }}>
+              <label className="form-label">Google Gemini API Key (Optional)</label>
+              <div style={{ display: "flex", gap: 8 }}>
+                <input
+                  type="password"
+                  className="input-field"
+                  placeholder="AIzaSy..."
+                  value={user.geminiApiKey || ""}
+                  onChange={(e) => updateDb((p) => ({ ...p, user: { ...p.user, geminiApiKey: e.target.value } }))}
+                />
+                <button
+                  className="btn btn--blue"
+                  onClick={() => showToast(user.geminiApiKey ? "Gemini API key saved to device!" : "Cleared custom API key. Using default neural engine.", "success")}
+                >
+                  Save Key
+                </button>
+              </div>
+              <span style={{ fontSize: 11, color: "var(--text-muted)" }}>
+                Key is stored securely on your local device only and never shared.
+              </span>
+            </div>
+          </div>
+
+          <div className="card panel">
+            <h3 className="panel__title">Local Device Database &amp; Storage</h3>
+            <p style={{ color: "var(--text-secondary)", fontSize: 13 }}>
+              Your data is stored locally on this device using persistent browser storage (IndexedDB / LocalStorage) and local REST server synchronization. All additions, edits, and completions persist across refreshes.
+            </p>
+
+            <div style={{ display: "flex", gap: 12, flexWrap: "wrap", paddingTop: 10 }}>
+              <button className="btn btn--blue" onClick={handleExportDatabase}>
+                <Icon name="download" size={15} /> Export Backup (JSON)
+              </button>
+
+              <label className="btn btn--chip" style={{ cursor: "pointer" }}>
+                <Icon name="upload" size={15} /> Restore from File (JSON)
+                <input
+                  type="file"
+                  accept=".json"
+                  style={{ display: "none" }}
+                  onChange={handleImportDatabase}
+                />
+              </label>
+
+              <button
+                className="btn btn--danger-ghost"
+                onClick={() => {
+                  if (confirm("Reset local device database to factory default data?")) {
+                    const fresh = DeviceDatabase.reset();
+                    setDb(fresh);
+                    showToast("Database reset to factory defaults", "info");
+                  }
+                }}
+              >
+                <Icon name="trash" size={15} /> Reset Database
+              </button>
+            </div>
+          </div>
+
+          <div className="card panel">
+            <h3 className="panel__title">Profile &amp; Account Settings</h3>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+              <div className="form-group">
+                <label className="form-label">Full Name</label>
+                <input
+                  className="input-field"
+                  value={user.name}
+                  onChange={(e) => updateDb((p) => ({ ...p, user: { ...p.user, name: e.target.value } }))}
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Email Address</label>
+                <input
+                  className="input-field"
+                  value={user.email}
+                  onChange={(e) => updateDb((p) => ({ ...p, user: { ...p.user, email: e.target.value } }))}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+
+      const navSections = [
+        {
+          id: "core",
+          label: "Core",
+          items: [
+            { id: "dashboard", label: "Dashboard", icon: "home" },
+            { id: "timeline", label: "Intelligent Timeline", icon: "clock", badge: { label: `${timelineEvents?.length || 4}`, tone: "neutral" } },
+            { id: "planner", label: "AI Planner & Goals", icon: "sparkle" },
+            { id: "inbox", label: "Universal Inbox", icon: "inbox", badge: { label: "6 items", tone: "indigo" } },
+          ],
+        },
+        {
+          id: "graph",
+          label: "Intelligence & Graph",
+          items: [
+            { id: "graph", label: "Relationship Graph", icon: "graph" },
+            { id: "automations", label: "Automations", icon: "refresh", badge: { label: `${automations?.length || 4}`, tone: "emerald" } },
+          ],
+        },
+        {
+          id: "ecosystem",
+          label: "Ecosystem",
+          items: [
+            { id: "apps", label: "Connected Apps", icon: "link", badge: { label: "6 active", tone: "neutral" } },
+            { id: "payments", label: "Payments & Ledger", icon: "wallet" },
+            { id: "subscriptions", label: "Subscriptions", icon: "repeat" },
+            { id: "vault", label: "Document Vault", icon: "folder" },
+          ],
+        },
+        {
+          id: "system",
+          label: "System",
+          items: [
+            { id: "notifications", label: "Notifications", icon: "bell", badge: { label: `${db.notifications.filter(n=>n.unread).length}`, tone: "danger" } },
+            { id: "settings", label: "Settings & Backup", icon: "settings" },
+          ],
+        },
+      ];
+
+      return (
+        <div className="shell">
+          <div
+            className={`scrim ${navOpen ? "scrim--on" : ""}`}
+            onClick={() => setNavOpen(false)}
+          />
+
+          <aside className={`sidebar ${navOpen ? "sidebar--open" : ""}`}>
+            <div className="sidebar__brand">
+              <div className="brand" onClick={() => setActiveNav("dashboard")}>
+                <span className="brand__logo">
+                  <Icon name="neural" size={18} />
+                </span>
+                <span className="brand__name">LifeSync AI</span>
+              </div>
+              <span className="chip chip--blue-text">OS v2.4</span>
+            </div>
+
+            <nav className="sidebar__nav">
+              {navSections.map((section) => (
+                <div className="nav-section" key={section.id}>
+                  <p className="nav-section__label">{section.label}</p>
+                  {section.items.map((item) => {
+                    const active = item.id === activeNav;
+                    return (
+                      <a
+                        key={item.id}
+                        href="#"
+                        className={`nav-link ${active ? "nav-link--active" : ""}`}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setActiveNav(item.id);
+                          setNavOpen(false);
+                        }}
+                      >
+                        <span className="nav-link__main">
+                          <Icon name={item.icon} size={16} />
+                          <span>{item.label}</span>
+                        </span>
+                        {item.badge && (
+                          <span className={`nav-badge nav-badge--${item.badge.tone}`}>
+                            {item.badge.label}
+                          </span>
+                        )}
+                      </a>
+                    );
+                  })}
+                </div>
+              ))}
+            </nav>
+
+            <div className="sidebar__footer">
+              <div className="status-card">
+                <span className="dot dot--emerald" />
+                <div className="status-card__text">
+                  <p className="status-card__title">Local Device Database</p>
+                  <p className="status-card__sub">Persistent Storage Active</p>
+                </div>
+              </div>
+              <a
+                href="#"
+                className="nav-link"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setActiveNav("settings");
+                }}
+              >
+                <span className="nav-link__main">
+                  <Icon name="settings" size={16} />
+                  <span>Settings &amp; Backup</span>
+                </span>
+              </a>
+              <div className="profile">
+                <div className="profile__who" onClick={() => setActiveNav("settings")}>
+                  <span className="avatar" style={{ width: 34, height: 34 }}>
+                    <span>{user.shortName[0]}</span>
+                  </span>
+                  <div>
+                    <p className="profile__name">{user.name}</p>
+                    <p className="profile__email">{user.email}</p>
+                  </div>
+                </div>
+                <button
+                  className="icon-btn icon-btn--sm"
+                  aria-label="Settings"
+                  onClick={() => setActiveNav("settings")}
+                >
+                  <Icon name="settings" size={16} />
+                </button>
+              </div>
+            </div>
+          </aside>
+
+          <div className="main">
+            <header className="header">
+              <button
+                className="icon-btn header__menu"
+                onClick={() => setNavOpen(true)}
+                aria-label="Open navigation"
+              >
+                <Icon name="menu" size={20} />
+              </button>
+
+              <div className="search">
+                <Icon name="search" size={15} className="search__icon" />
+                <input
+                  ref={searchRef}
+                  type="search"
+                  className="search__input"
+                  placeholder="Search obligations, timeline, automations, subscriptions…"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                <kbd className="search__kbd">⌘K</kbd>
+
+                {searchQuery && (
+                  <div className="search-dropdown">
+                    {searchResults.length > 0 ? (
+                      searchResults.map((item) => (
+                        <div
+                          key={item.id}
+                          className="search-item"
+                          onClick={() => {
+                            setActiveNav(item.tab || "dashboard");
+                            showToast(`Navigated to ${item.title}`);
+                            setSearchQuery("");
+                          }}
+                        >
+                          <span className="search-item__title">{item.title}</span>
+                          <span className="search-item__type">{item.type}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <div style={{ padding: "12px", color: "var(--text-muted)", fontSize: 13, textAlign: "center" }}>
+                        No matching results found in local database
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div className="header__actions">
+                <button className="btn btn--ghost-violet" onClick={() => setAiModalOpen(true)}>
+                  <Icon name="sparkle" size={15} />
+                  <span>Ask LifeSync AI</span>
+                </button>
+                <button className="btn btn--blue" onClick={() => setQuickAddOpen(true)}>
+                  <Icon name="plus" size={13} strokeWidth={2.5} />
+                  <span>Quick Add</span>
+                </button>
+                <span className="header__divider" aria-hidden="true" />
+                <span className="chip chip--sync" onClick={handleForceSync} title="Click to force sync">
+                  <span className="dot dot--blue" />
+                  {sync.appsSynced} Apps Synced ({sync.lastSyncedLabel})
+                </span>
+                <button
+                  className="icon-btn header__bell"
+                  onClick={() => setActiveNav("notifications")}
+                  aria-label="Notifications"
+                >
+                  <Icon name="bell" size={17} />
+                  {db.notifications.some(n => n.unread) && <span className="header__bell-dot" />}
+                </button>
+                <span
+                  className="avatar"
+                  style={{ width: 34, height: 34, cursor: "pointer" }}
+                  onClick={() => setActiveNav("settings")}
+                >
+                  <span>{user.shortName[0]}</span>
+                </span>
+              </div>
+            </header>
+
+            <main className="content">
+              <div className="aura" aria-hidden="true">
+                <span className="aura__a" />
+                <span className="aura__b" />
+              </div>
+
+              {activeNav === "dashboard" && renderDashboardView()}
+              {activeNav === "timeline" && renderTimelineView()}
+              {activeNav === "planner" && renderPlannerView()}
+              {activeNav === "inbox" && renderInboxView()}
+              {activeNav === "graph" && renderGraphView()}
+              {activeNav === "automations" && renderAutomationsView()}
+              {activeNav === "apps" && renderConnectedAppsView()}
+              {activeNav === "payments" && renderPaymentsView()}
+              {activeNav === "subscriptions" && renderSubscriptionsView()}
+              {activeNav === "vault" && renderVaultView()}
+              {activeNav === "notifications" && renderNotificationsView()}
+              {activeNav === "settings" && renderSettingsView()}
+            </main>
+          </div>
+
+          {/* ================= MODALS ================= */}
+
+          {/* 1. OBJECTIVE / CHECKLIST COMPLETED POPUP */}
+          {celebrationData && (
+            <div className="modal-overlay" onClick={() => setCelebrationData(null)}>
+              <div className="modal celebration-modal" onClick={(e) => e.stopPropagation()}>
+                <div className="celebration-badge">
+                  <Icon name="trophy" size={38} />
+                </div>
+                <h2 className="celebration-title">{celebrationData.title}</h2>
+                <p className="celebration-sub">{celebrationData.details}</p>
+
+                <div className="celebration-stats">
+                  <div className="celebration-stat">
+                    <p className="celebration-stat__label">Cognitive Relief</p>
+                    <p className="celebration-stat__val">+{celebrationData.loadReduction}%</p>
+                  </div>
+                  {celebrationData.savedAmount && (
+                    <div className="celebration-stat">
+                      <p className="celebration-stat__label">Ledger Value</p>
+                      <p className="celebration-stat__val">{formatINR(celebrationData.savedAmount)}</p>
+                    </div>
+                  )}
+                  <div className="celebration-stat">
+                    <p className="celebration-stat__label">Integrity</p>
+                    <p className="celebration-stat__val">100% Guarded</p>
+                  </div>
+                </div>
+
+                <div style={{ marginTop: 12, width: "100%", display: "flex", justifyContent: "center" }}>
+                  <button className="btn btn--lg btn--emerald" style={{ width: "100%", maxWidth: 280 }} onClick={() => setCelebrationData(null)}>
+                    Awesome, Continue
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 2. REAL AI CHAT ASSISTANT MODAL */}
+          {aiModalOpen && (
+            <div className="modal-overlay" onClick={() => setAiModalOpen(false)}>
+              <div className="modal modal--lg" onClick={(e) => e.stopPropagation()}>
+                <div className="modal__head">
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <Icon name="sparkle" size={18} style={{ color: "var(--violet)" }} />
+                    <h3 className="modal__title">Ask LifeSync AI Neural Assistant</h3>
+                  </div>
+                  <button className="icon-btn icon-btn--sm" onClick={() => setAiModalOpen(false)}>
+                    <Icon name="close" size={16} />
+                  </button>
+                </div>
+
+                <div className="modal__body">
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                    {[
+                      "Why renew vehicle insurance on Oct 11?",
+                      "Summarize my upcoming timeline events",
+                      "How can I save on duplicate subscriptions?",
+                      "What is cognitive load and how can I reduce it?",
+                      "Write a reminder for my vehicle service",
+                    ].map((prompt, idx) => (
+                      <button
+                        key={idx}
+                        className="btn btn--xs btn--chip"
+                        onClick={() => handleSendAiMessage(prompt)}
+                      >
+                        {prompt}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="chat-container">
+                    {aiHistory.map((msg, i) => (
+                      <div
+                        key={i}
+                        className={`chat-bubble chat-bubble--${msg.role}`}
+                      >
+                        <p className="chat-bubble__author">
+                          {msg.role === "assistant" ? "LifeSync AI" : user.name}
+                        </p>
+                        <p style={{ color: "var(--text-primary)", whiteSpace: "pre-wrap" }}>{msg.text}</p>
+                      </div>
+                    ))}
+                    {aiBusy && (
+                      <div style={{ color: "var(--text-muted)", fontSize: 13, display: "flex", alignItems: "center", gap: 8, padding: 8 }}>
+                        <Icon name="sparkle" size={16} style={{ color: "var(--violet)" }} />
+                        <span>LifeSync Neural LLM is reasoning and generating response…</span>
+                      </div>
+                    )}
+                    <div ref={chatEndRef} />
+                  </div>
+
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <input
+                      type="text"
+                      className="input-field"
+                      placeholder="Ask anything — schedule, coding, finance, advice, general questions…"
+                      value={aiPrompt}
+                      onChange={(e) => setAiPrompt(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && handleSendAiMessage()}
+                    />
+                    <button className="btn btn--blue" onClick={() => handleSendAiMessage()} disabled={aiBusy}>
+                      Send
+                    </button>
+                  </div>
+                </div>
+
+                <div className="modal__foot">
+                  <button className="btn btn--chip" onClick={() => setAiModalOpen(false)}>
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 3. ADD TIMELINE EVENT MODAL */}
+          {addTimelineOpen && (
+            <div className="modal-overlay" onClick={() => setAddTimelineOpen(false)}>
+              <div className="modal" onClick={(e) => e.stopPropagation()}>
+                <div className="modal__head">
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <Icon name="clock" size={18} style={{ color: "var(--blue)" }} />
+                    <h3 className="modal__title">Add Timeline Event</h3>
+                  </div>
+                  <button className="icon-btn icon-btn--sm" onClick={() => setAddTimelineOpen(false)}>
+                    <Icon name="close" size={16} />
+                  </button>
+                </div>
+
+                <form onSubmit={handleAddTimelineSubmit}>
+                  <div className="modal__body">
+                    <div className="form-group">
+                      <label className="form-label">EVENT TITLE *</label>
+                      <input
+                        type="text"
+                        className="input-field"
+                        placeholder="e.g. Flight to Delhi / Pay Broadband Bill"
+                        required
+                        value={tlTitle}
+                        onChange={(e) => setTlTitle(e.target.value)}
+                      />
+                    </div>
+
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                      <div className="form-group">
+                        <label className="form-label">DATE *</label>
+                        <input
+                          type="date"
+                          className="input-field"
+                          required
+                          value={tlDate}
+                          onChange={(e) => setTlDate(e.target.value)}
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label className="form-label">CATEGORY</label>
+                        <select
+                          className="input-field"
+                          value={tlCategory}
+                          onChange={(e) => setTlCategory(e.target.value)}
+                        >
+                          <option value="Critical Action">Critical Action</option>
+                          <option value="Service">Service</option>
+                          <option value="Travel Event">Travel Event</option>
+                          <option value="Auto-Debit">Auto-Debit</option>
+                          <option value="Healthcare">Healthcare</option>
+                          <option value="Milestone">Milestone</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                      <div className="form-group">
+                        <label className="form-label">HIGHLIGHT COLOR</label>
+                        <select
+                          className="input-field"
+                          value={tlTone}
+                          onChange={(e) => setTlTone(e.target.value)}
+                        >
+                          <option value="danger">Red (Urgent)</option>
+                          <option value="indigo">Indigo (Travel / Auto)</option>
+                          <option value="blue">Blue (Standard)</option>
+                          <option value="emerald">Emerald (Positive)</option>
+                          <option value="neutral">Neutral (Routine)</option>
+                        </select>
+                      </div>
+
+                      <div className="form-group">
+                        <label className="form-label">AMOUNT (OPTIONAL)</label>
+                        <input
+                          type="text"
+                          className="input-field"
+                          placeholder="e.g. 2,500"
+                          value={tlAmount}
+                          onChange={(e) => setTlAmount(e.target.value)}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">DESCRIPTION / NOTES</label>
+                      <textarea
+                        className="input-field"
+                        placeholder="Add contextual details, prep requirements, or links…"
+                        value={tlDescription}
+                        onChange={(e) => setTlDescription(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="modal__foot">
+                    <button type="button" className="btn btn--text" onClick={() => setAddTimelineOpen(false)}>
+                      Cancel
+                    </button>
+                    <button type="submit" className="btn btn--blue">
+                      Add to Timeline
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {/* 4. ADD AUTOMATION MODAL */}
+          {addAutomationOpen && (
+            <div className="modal-overlay" onClick={() => setAddAutomationOpen(false)}>
+              <div className="modal" onClick={(e) => e.stopPropagation()}>
+                <div className="modal__head">
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <Icon name="refresh" size={18} style={{ color: "var(--emerald)" }} />
+                    <h3 className="modal__title">Create New Automation Guardrail</h3>
+                  </div>
+                  <button className="icon-btn icon-btn--sm" onClick={() => setAddAutomationOpen(false)}>
+                    <Icon name="close" size={16} />
+                  </button>
+                </div>
+
+                <form onSubmit={handleAddAutomationSubmit}>
+                  <div className="modal__body">
+                    <div className="form-group">
+                      <label className="form-label">AUTOMATION NAME *</label>
+                      <input
+                        type="text"
+                        className="input-field"
+                        placeholder="e.g. Broadband Bill AutoPay under ₹1,500"
+                        required
+                        value={autName}
+                        onChange={(e) => setAutName(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">CATEGORY</label>
+                      <select
+                        className="input-field"
+                        value={autCategory}
+                        onChange={(e) => setAutCategory(e.target.value)}
+                      >
+                        <option value="Bills & Payments">Bills &amp; Payments</option>
+                        <option value="Travel Shield">Travel Shield</option>
+                        <option value="SaaS Monitor">SaaS &amp; Subscriptions</option>
+                        <option value="Identity">Identity &amp; Legal</option>
+                        <option value="Health">Health &amp; Wellness</option>
+                      </select>
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">TRIGGER (WHEN CONDITION) *</label>
+                      <input
+                        type="text"
+                        className="input-field"
+                        placeholder="e.g. When broadband invoice is received via Gmail under ₹1,500"
+                        required
+                        value={autTrigger}
+                        onChange={(e) => setAutTrigger(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label className="form-label">ACTION (THEN EXECUTE) *</label>
+                      <input
+                        type="text"
+                        className="input-field"
+                        placeholder="e.g. Schedule payment 2 days before due date via UPI & record in ledger"
+                        required
+                        value={autAction}
+                        onChange={(e) => setAutAction(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="modal__foot">
+                    <button type="button" className="btn btn--text" onClick={() => setAddAutomationOpen(false)}>
+                      Cancel
+                    </button>
+                    <button type="submit" className="btn btn--emerald">
+                      Activate Automation
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {/* 5. QUICK ADD MODAL */}
+          {quickAddOpen && (
+            <div className="modal-overlay" onClick={() => setQuickAddOpen(false)}>
+              <div className="modal" onClick={(e) => e.stopPropagation()}>
+                <div className="modal__head">
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <Icon name="plus" size={16} style={{ color: "var(--blue)" }} />
+                    <h3 className="modal__title">Quick Add Obligation or Task</h3>
+                  </div>
+                  <button className="icon-btn icon-btn--sm" onClick={() => setQuickAddOpen(false)}>
+                    <Icon name="close" size={16} />
+                  </button>
+                </div>
+
+                <form onSubmit={handleQuickAddSubmit}>
+                  <div className="modal__body">
+                    <div className="form-group">
+                      <label className="form-label">TITLE / DESCRIPTION *</label>
+                      <input
+                        type="text"
+                        className="input-field"
+                        placeholder="e.g. Broadband Fiber Bill"
+                        required
+                        value={qaTitle}
+                        onChange={(e) => setQaTitle(e.target.value)}
+                      />
+                    </div>
+
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                      <div className="form-group">
+                        <label className="form-label">AMOUNT (INR)</label>
+                        <input
+                          type="text"
+                          className="input-field"
+                          placeholder="e.g. 1,499"
+                          value={qaAmount}
+                          onChange={(e) => setQaAmount(e.target.value)}
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label">DUE DATE</label>
+                        <input
+                          type="date"
+                          className="input-field"
+                          value={qaDate}
+                          onChange={(e) => setQaDate(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="modal__foot">
+                    <button type="button" className="btn btn--text" onClick={() => setQuickAddOpen(false)}>
+                      Cancel
+                    </button>
+                    <button type="submit" className="btn btn--blue">
+                      Save to Device
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {/* 6. RELATIONSHIP GRAPH MODAL */}
+          {graphModalOpen && (
+            <div className="modal-overlay" onClick={() => setGraphModalOpen(false)}>
+              <div className="modal modal--lg" onClick={(e) => e.stopPropagation()}>
+                <div className="modal__head">
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <Icon name="graph" size={16} style={{ color: "var(--blue-soft)" }} />
+                    <h3 className="modal__title">Relationship Graph Inspector</h3>
+                  </div>
+                  <button className="icon-btn icon-btn--sm" onClick={() => setGraphModalOpen(false)}>
+                    <Icon name="close" size={16} />
+                  </button>
+                </div>
+
+                <div className="modal__body">
+                  <p style={{ color: "var(--text-secondary)", fontSize: 13 }}>
+                    Autonomous causal dependency chain resolved for <strong>Vehicle Insurance</strong>:
+                  </p>
+
+                  <div className="graph-node-container">
+                    <div className="graph-node graph-node--danger">
+                      <div>
+                        <strong>Gmail Notification</strong>
+                        <p style={{ fontSize: 12, color: "var(--text-muted)" }}>Policy expiry notice from HDFC ERGO detected on Oct 9</p>
+                      </div>
+                      <span className="chip chip--live">Input Node</span>
+                    </div>
+                    <div style={{ textAlign: "center", color: "var(--text-muted)", fontSize: 12, fontWeight: 700 }}>↓ connects to</div>
+                    <div className="graph-node">
+                      <div>
+                        <strong>Vahan National Ledger</strong>
+                        <p style={{ fontSize: 12, color: "var(--text-muted)" }}>Hyundai Creta KA-01-MJ-4021 record verified</p>
+                      </div>
+                      <span className="chip chip--sync">Verified</span>
+                    </div>
+                    <div style={{ textAlign: "center", color: "var(--text-muted)", fontSize: 12, fontWeight: 700 }}>↓ collides with</div>
+                    <div className="graph-node graph-node--violet">
+                      <div>
+                        <strong>Calendar Road Trip: Oct 17</strong>
+                        <p style={{ fontSize: 12, color: "var(--text-muted)" }}>Goa departure requires active zero-dep policy &amp; road assistance</p>
+                      </div>
+                      <span className="chip chip--engine">Constraint</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="modal__foot">
+                  <button className="btn btn--blue" onClick={() => setGraphModalOpen(false)}>
+                    Understood
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 7. DOCTOR PREP MODAL */}
+          {directionsModalOpen && (
+            <div className="modal-overlay" onClick={() => setDirectionsModalOpen(false)}>
+              <div className="modal" onClick={(e) => e.stopPropagation()}>
+                <div className="modal__head">
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <Icon name="medical" size={16} style={{ color: "var(--indigo)" }} />
+                    <h3 className="modal__title">Dr. Sharma Consultation Prep</h3>
+                  </div>
+                  <button className="icon-btn icon-btn--sm" onClick={() => setDirectionsModalOpen(false)}>
+                    <Icon name="close" size={16} />
+                  </button>
+                </div>
+
+                <div className="modal__body">
+                  <div style={{ padding: 14, background: "var(--bg-item)", borderRadius: "var(--r-md)" }}>
+                    <p style={{ fontWeight: 700, fontSize: 14 }}>Apollo Specialty Hospital, Indiranagar</p>
+                    <p style={{ color: "var(--text-secondary)", fontSize: 12, marginTop: 4 }}>
+                      Time: Today @ 4:30 PM • Slot #14 • 2nd Floor, Room 204
+                    </p>
+                  </div>
+
+                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                    <p className="eyebrow">Preparation Checklist</p>
+                    <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13 }}>
+                      <input type="checkbox" defaultChecked /> Carry recent blood test report (saved in Document Vault)
+                    </label>
+                    <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13 }}>
+                      <input type="checkbox" defaultChecked /> Fasting requirement not required
+                    </label>
+                    <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13 }}>
+                      <input type="checkbox" defaultChecked /> Estimated travel time: 25 mins via Old Airport Rd
+                    </label>
+                  </div>
+                </div>
+
+                <div className="modal__foot">
+                  <button className="btn btn--text" onClick={() => setDirectionsModalOpen(false)}>
+                    Dismiss
+                  </button>
+                  <button className="btn btn--blue" onClick={handleCompleteDoctorPrep}>
+                    Mark Prep Completed
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 8. FIGMA REVIEW MODAL */}
+          {reviewModalOpen && (
+            <div className="modal-overlay" onClick={() => setReviewModalOpen(false)}>
+              <div className="modal" onClick={(e) => e.stopPropagation()}>
+                <div className="modal__head">
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <Icon name="review" size={16} style={{ color: "var(--danger-soft)" }} />
+                    <h3 className="modal__title">Figma Professional Plan Review</h3>
+                  </div>
+                  <button className="icon-btn icon-btn--sm" onClick={() => setReviewModalOpen(false)}>
+                    <Icon name="close" size={16} />
+                  </button>
+                </div>
+
+                <div className="modal__body">
+                  <div style={{ padding: 14, background: "rgba(147, 0, 10, 0.2)", borderRadius: "var(--r-md)", border: "1px solid rgba(255, 180, 171, 0.2)" }}>
+                    <p style={{ fontWeight: 700, color: "var(--danger-soft)" }}>Price Increase Alert (+₹200/mo)</p>
+                    <p style={{ color: "var(--text-secondary)", fontSize: 13, marginTop: 4 }}>
+                      Your monthly rate adjusted from ₹1,099/mo to ₹1,299/mo starting tomorrow.
+                    </p>
+                  </div>
+
+                  <p style={{ color: "var(--text-secondary)", fontSize: 13 }}>
+                    LifeSync verified you have 4 active design projects in this workspace over the last 30 days.
+                  </p>
+                </div>
+
+                <div className="modal__foot">
+                  <button className="btn btn--danger-ghost" onClick={() => {
+                    setReviewModalOpen(false);
+                    showToast("Cancellation reminder queued for Figma", "success");
+                  }}>
+                    Queue Cancellation
+                  </button>
+                  <button className="btn btn--blue" onClick={() => {
+                    setReviewModalOpen(false);
+                    showToast("Figma plan maintained", "info");
+                  }}>
+                    Keep Subscription
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Toast Notification Container */}
+          <div className="toasts">
+            {toasts.map((t) => (
+              <div className={`toast toast--${t.tone}`} key={t.id}>
+                <Icon name={t.tone === "success" ? "checkCircle" : t.tone === "error" ? "alert" : "sparkle"} size={16} />
+                <span>{t.message}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>
